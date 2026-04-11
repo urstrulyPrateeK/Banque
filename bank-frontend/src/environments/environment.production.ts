@@ -1,6 +1,6 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://api.securebank.com/api',
+    apiUrl: '/api/v1',
     appName: 'SecureBank',
     version: '1.0.0',
     features: {
