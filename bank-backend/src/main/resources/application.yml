@@ -1,0 +1,79 @@
+# Banque - by Prateek Singh | github.com/prateeksingh
+server:
+  port: ${PORT:${SERVER_PORT:8080}}
+
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:Banque}
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:banquedb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  cache:
+    type: caffeine
+    cache-names: account-balance
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=30s
+  cloud:
+    gcp:
+      project-id: ${GCP_PROJECT_ID:banque-project-id}
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  expiration: ${JWT_EXPIRATION:3600}
+  refresh-expiration: ${JWT_REFRESH_EXPIRATION:7200}
+
+app:
+  name: Banque
+  author: Prateek Singh
+  website: ${APP_WEBSITE:https://prateeksingh.dev}
+  frontend:
+    url: ${APP_FRONTEND_URL:http://localhost:4200}
+  mail:
+    from: ${MAIL_FROM:noreply@banque.dev}
+  gcp:
+    enabled: ${GCP_ENABLED:false}
+    project-id: ${GCP_PROJECT_ID:banque-project-id}
+    bucket-name: ${GCP_STORAGE_BUCKET:banque-documents}
+    signed-url-minutes: ${GCP_SIGNED_URL_MINUTES:15}
+    local-storage-path: ${GCP_LOCAL_STORAGE_PATH:${java.io.tmpdir}/banque-documents}
+    credentials-location: ${GOOGLE_APPLICATION_CREDENTIALS:}
+  documents:
+    signing-secret: ${DOCUMENT_SIGNING_SECRET:${jwt.secret}}
+    signed-url-minutes: ${DOCUMENT_SIGNED_URL_MINUTES:15}
+
+logging:
+  level:
+    org.springframework.security: ${LOG_SECURITY_LEVEL:INFO}
+    dev.prateek.banque: ${LOG_APP_LEVEL:INFO}
+  pattern:
+    level: "%5p [userId:%X{userId:-anonymous}]"

@@ -35,8 +35,8 @@ export class ContactComponent {
         {
             icon: '📧',
             title: 'Email',
-            content: 'support@securebank.com',
-            link: 'mailto:support@securebank.com'
+            content: 'support@Banque.com',
+            link: 'mailto:support@Banque.com'
         },
         {
             icon: '📞',
@@ -97,3 +97,4 @@ export class ContactComponent {
         }
     }
 }
+

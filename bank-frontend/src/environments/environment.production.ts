@@ -1,7 +1,7 @@
 export const environment = {
     production: true,
     apiUrl: '/api/v1',
-    appName: 'SecureBank',
+    appName: 'Banque',
     version: '1.0.0',
     features: {
         mfaEnabled: true,
@@ -11,3 +11,4 @@ export const environment = {
     refreshTokenKey: 'refresh_token',
     tokenExpiryKey: 'token_expiry',
 };
+

@@ -7,6 +7,7 @@ export const CARD_ROUTES: Routes = [
             import('./components/card-list/card-list.component').then(
                 (m) => m.CardListComponent
             ),
-        title: 'Cards - SecureBank',
+        title: 'Cards - Banque',
     },
 ];
+

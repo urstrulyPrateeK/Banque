@@ -53,12 +53,12 @@ export class FAQComponent {
         {
             category: 'security',
             question: 'What should I do if I suspect unauthorized activity?',
-            answer: 'Contact us immediately at support@securebank.com or call +1 (555) 123-4567. We\'ll help you secure your account and investigate any suspicious transactions.'
+            answer: 'Contact us immediately at support@Banque.com or call +1 (555) 123-4567. We\'ll help you secure your account and investigate any suspicious transactions.'
         },
         {
             category: 'transactions',
             question: 'How long do transfers take?',
-            answer: 'Internal transfers between SecureBank accounts are instant. External transfers typically take 1-3 business days depending on the receiving bank.'
+            answer: 'Internal transfers between Banque accounts are instant. External transfers typically take 1-3 business days depending on the receiving bank.'
         },
         {
             category: 'transactions',
@@ -78,7 +78,7 @@ export class FAQComponent {
         {
             category: 'support',
             question: 'How can I contact customer support?',
-            answer: 'You can reach us via email at support@securebank.com, phone at +1 (555) 123-4567, or through our in-app chat feature. Our support team is available Monday-Friday, 9 AM - 6 PM EST.'
+            answer: 'You can reach us via email at support@Banque.com, phone at +1 (555) 123-4567, or through our in-app chat feature. Our support team is available Monday-Friday, 9 AM - 6 PM EST.'
         },
         {
             category: 'support',
@@ -109,3 +109,4 @@ export class FAQComponent {
         this.openIndex.set(null);
     }
 }
+

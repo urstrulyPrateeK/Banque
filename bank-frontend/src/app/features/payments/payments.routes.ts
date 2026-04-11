@@ -7,7 +7,7 @@ export const PAYMENT_ROUTES: Routes = [
             import('./components/payment-list/payment-list.component').then(
                 (m) => m.PaymentListComponent
             ),
-        title: 'Payments - SecureBank',
+        title: 'Payments - Banque',
     },
     {
         path: ':id/receipt',
@@ -15,6 +15,7 @@ export const PAYMENT_ROUTES: Routes = [
             import('./components/payment-receipt/payment-receipt.component').then(
                 (m) => m.PaymentReceiptComponent
             ),
-        title: 'Payment Receipt - SecureBank',
+        title: 'Payment Receipt - Banque',
     },
 ];
+

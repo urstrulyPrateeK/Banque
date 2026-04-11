@@ -5,19 +5,19 @@ export const AUTH_ROUTES: Routes = [
         path: 'login',
         loadComponent: () =>
             import('./components/login/login.component').then((m) => m.LoginComponent),
-        title: 'Login - SecureBank',
+        title: 'Login - Banque',
     },
     {
         path: 'register',
         loadComponent: () =>
             import('./components/register/register.component').then((m) => m.RegisterComponent),
-        title: 'Create Account - SecureBank',
+        title: 'Create Account - Banque',
     },
     {
         path: 'verify-otp',
         loadComponent: () =>
             import('./components/two-factor/two-factor.component').then((m) => m.TwoFactorComponent),
-        title: 'Verify OTP - SecureBank',
+        title: 'Verify OTP - Banque',
     },
     {
         path: 'forgot-password',
@@ -25,7 +25,7 @@ export const AUTH_ROUTES: Routes = [
             import('./components/forgot-password/forgot-password.component').then(
                 (m) => m.ForgotPasswordComponent
             ),
-        title: 'Forgot Password - SecureBank',
+        title: 'Forgot Password - Banque',
     },
     {
         path: 'reset-password',
@@ -33,7 +33,7 @@ export const AUTH_ROUTES: Routes = [
             import('./components/reset-password/reset-password.component').then(
                 (m) => m.ResetPasswordComponent
             ),
-        title: 'Reset Password - SecureBank',
+        title: 'Reset Password - Banque',
     },
     {
         path: 'verify-email',
@@ -41,7 +41,7 @@ export const AUTH_ROUTES: Routes = [
             import('./components/verify-email/verify-email.component').then(
                 (m) => m.VerifyEmailComponent
             ),
-        title: 'Verify Email - SecureBank',
+        title: 'Verify Email - Banque',
     },
     {
         path: '',
@@ -49,3 +49,4 @@ export const AUTH_ROUTES: Routes = [
         pathMatch: 'full',
     },
 ];
+

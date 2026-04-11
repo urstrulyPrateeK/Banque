@@ -28,7 +28,7 @@ export const routes: Routes = [
                     import('@features/dashboard/components/dashboard/dashboard.component').then(
                         (m) => m.DashboardComponent
                     ),
-                title: 'Dashboard - SecureBank',
+                title: 'Dashboard - Banque',
             },
             {
                 path: 'accounts',
@@ -71,3 +71,4 @@ export const routes: Routes = [
         redirectTo: '',
     },
 ];
+
