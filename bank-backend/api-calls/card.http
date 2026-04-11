@@ -1,0 +1,109 @@
+### Get All Cards
+GET http://localhost:8080/api/v1/cards?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Request Card
+POST http://localhost:8080/api/v1/cards/request
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "cardType": "DEBIT"
+}
+
+### Get Card
+GET http://localhost:8080/api/v1/cards/1
+Authorization: Bearer <access-token>
+
+### Activate Card
+POST http://localhost:8080/api/v1/cards/1/activate
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "cvv": "123",
+  "pin": "1234"
+}
+
+### Block Card
+POST http://localhost:8080/api/v1/cards/1/block?reason=Lost
+Authorization: Bearer <access-token>
+
+### Unblock Card
+POST http://localhost:8080/api/v1/cards/1/unblock
+Authorization: Bearer <access-token>
+
+### Change Pin
+POST http://localhost:8080/api/v1/cards/1/change-pin
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "currentPin": "1234",
+  "newPin": "4321",
+  "confirmPin": "4321"
+}
+
+### Replace Card
+POST http://localhost:8080/api/v1/cards/1/replace?reason=Damaged
+Authorization: Bearer <access-token>
+
+### Report Lost Card
+POST http://localhost:8080/api/v1/cards/1/report-lost
+Authorization: Bearer <access-token>
+
+### Cancel Card
+DELETE http://localhost:8080/api/v1/cards/1
+Authorization: Bearer <access-token>
+
+### Get Card Limits
+GET http://localhost:8080/api/v1/cards/1/limits
+Authorization: Bearer <access-token>
+
+### Set Card Limits
+PUT http://localhost:8080/api/v1/cards/1/limits
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "dailyLimit": 1000,
+  "monthlyLimit": 5000,
+  "atmLimit": 500,
+  "posLimit": 2000
+}
+
+### Toggle Online Transactions
+PUT http://localhost:8080/api/v1/cards/1/online-transactions?enabled=true
+Authorization: Bearer <access-token>
+
+### Toggle Contactless
+PUT http://localhost:8080/api/v1/cards/1/contactless?enabled=true
+Authorization: Bearer <access-token>
+
+### Toggle International
+PUT http://localhost:8080/api/v1/cards/1/international?enabled=true
+Authorization: Bearer <access-token>
+
+### Get Card Transactions
+GET http://localhost:8080/api/v1/cards/1/transactions?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Get Card Statement
+GET http://localhost:8080/api/v1/cards/1/statement?startDate=2023-01-01&endDate=2023-12-31
+Authorization: Bearer <access-token>
+
+### Get Card Details
+GET http://localhost:8080/api/v1/cards/1/details
+Authorization: Bearer <access-token>
+
+### Get Card Types
+GET http://localhost:8080/api/v1/cards/types
+Authorization: Bearer <access-token>
+
+### Get Card Statistics
+GET http://localhost:8080/api/v1/cards/statistics
+Authorization: Bearer <access-token>
+
+### Health Check
+GET http://localhost:8080/api/v1/cards/health

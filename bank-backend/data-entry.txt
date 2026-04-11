@@ -1,0 +1,619 @@
+﻿-- =============================================================================
+-- BANKING APP â€” SEED / DUMMY DATA
+-- PostgreSQL 15+  |  Spring Boot 4 Banking Application
+-- =============================================================================
+-- Tables (19 total, inserted in FK-dependency order):
+--   1.  users
+--   2.  user_settings
+--   3.  user_activities
+--   4.  notifications
+--   5.  accounts
+--   6.  balance_history
+--   7.  beneficiaries
+--   8.  cards
+--   9.  card_transactions
+--  10.  transactions
+--  11.  transfers
+--  12.  recurring_transfers
+--  13.  loans
+--  14.  payments
+--  15.  saved_billers
+--  16.  recurring_payments
+--  17.  fixed_deposits
+--  18.  audit_logs
+-- =============================================================================
+-- NOTES
+--   â€¢ Passwords are BCrypt-hashed (cost 12) representations of "Password123".
+--   â€¢ card_number / cvv are dummy values â€” never use real card numbers.
+--   â€¢ All monetary amounts use DECIMAL(15,2) or DECIMAL(19,2) as per schema.
+--   â€¢ Run the entire file inside a single transaction for atomicity.
+-- =============================================================================
+
+-- Ensure we start fresh
+ROLLBACK;
+BEGIN;
+
+-- -----------------------------------------------------------------------------
+-- 1. USERS
+--    Depends on: nothing
+-- -----------------------------------------------------------------------------
+INSERT INTO users (
+    id, username, email, password,
+    first_name, last_name, phone_number, date_of_birth,
+    address, city, state, country, postal_code,
+    role, active, email_verified, mfa_enabled,
+    created_at, updated_at
+) VALUES
+-- Admin user
+(
+    1,
+    'prateek_singh',
+    'Prateek.lal@bankingapp.com',
+    '$2a$12$EfVdN20nFRvDwCBU6hcTfO5jlb/nXR57FZ4pvpwucQ88Rd9Q7O5Ne',   -- Password123
+    'Prateek', 'Lal',
+    '+1-555-0101', '1985-03-15',
+    '742 Evergreen Terrace', 'Springfield', 'Illinois', 'USA', '62701',
+    'ADMIN', true, true, true,
+    '2026-01-10 09:00:00', '2026-02-02 14:30:00'
+),
+-- Regular customer â€“ active, verified
+(
+    2,
+    'sunny_chauhan',
+    'sunny.chauhan@email.com',
+    '$2a$12$EfVdN20nFRvDwCBU6hcTfO5jlb/nXR57FZ4pvpwucQ88Rd9Q7O5Ne',
+    'Sunny', 'Chauhan',
+    '+1-555-0202', '1990-07-22',
+    '221B Baker Street', 'London', 'Greater London', 'UK', 'NW1 6XE',
+    'CUSTOMER', true, true, false,
+    '2026-01-12 10:00:00', '2026-02-03 08:15:00'
+),
+-- Regular customer â€“ 2FA enabled, one failed attempt
+(
+    3,
+    'honey_chauhan',
+    'honey.chauhan@email.com',
+    '$2a$12$EfVdN20nFRvDwCBU6hcTfO5jlb/nXR57FZ4pvpwucQ88Rd9Q7O5Ne',
+    'Honey', 'Chauhan',
+    '+1-555-0303', '1995-11-08',
+    '1600 Pennsylvania Ave NW', 'Washington', 'District of Columbia', 'USA', '20500',
+    'CUSTOMER', true, true, true,
+    '2026-01-14 11:00:00', '2026-02-01 19:45:00'
+);
+
+-- -----------------------------------------------------------------------------
+-- 2. USER_SETTINGS
+--    Depends on: users
+-- -----------------------------------------------------------------------------
+INSERT INTO user_settings (
+    id, user_id,
+    language, time_zone, currency,
+    email_notifications, sms_notifications, push_notifications,
+    transaction_notifications, security_notifications, marketing_notifications,
+    theme, profile_visibility, show_email, show_phone,
+    created_at, updated_at
+) VALUES
+(1, 1, 'en', 'America/Chicago',  'USD', true,  true,  true,  true,  true,  false, 'light', 'PRIVATE', false, false, '2026-01-10 09:00:00', '2026-02-01 10:00:00'),
+(2, 2, 'en', 'Europe/London',    'GBP', true,  false, true,  true,  true,  true,  'dark', 'PRIVATE', false, false, '2026-01-12 10:00:00', '2026-01-20 14:00:00'),
+(3, 3, 'zh', 'Asia/Shanghai',    'CNY', true,  true,  false, true,  false, false, 'light', 'PRIVATE', false, false, '2026-01-14 11:00:00', '2026-01-28 09:30:00');
+
+-- -----------------------------------------------------------------------------
+-- 3. USER_ACTIVITIES
+--    Depends on: users
+-- -----------------------------------------------------------------------------
+INSERT INTO user_activities (
+    id, user_id, action, description,
+    ip_address, user_agent, created_at
+) VALUES
+(1, 1, 'LOGIN',           'Successful admin login',                          '192.168.1.10',  'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',  '2026-02-02 14:30:00'),
+(2, 1, 'PROFILE_UPDATE',  'Updated phone number',                            '192.168.1.10',  'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',  '2026-02-02 14:35:00'),
+(3, 2, 'LOGIN',           'Successful login from London office',             '10.0.0.55',     'Mozilla/5.0 (Macintosh; Intel Mac OS X 13)', '2026-02-03 08:15:00'),
+(4, 2, 'PASSWORD_CHANGE', 'Password changed via reset link',                 '10.0.0.55',     'Mozilla/5.0 (Macintosh; Intel Mac OS X 13)', '2026-02-01 12:00:00'),
+(5, 3, 'LOGIN',           'Login attempt - OTP sent',                        '172.16.0.8',    'Chrome/121.0 (Linux; x64)',                  '2026-02-01 19:45:00'),
+(6, 3, 'SETTINGS_UPDATE', 'Enabled SMS notifications',                       '172.16.0.8',    'Chrome/121.0 (Linux; x64)',                  '2026-01-28 09:30:00');
+
+-- -----------------------------------------------------------------------------
+-- 4. NOTIFICATIONS
+--    Depends on: users
+-- -----------------------------------------------------------------------------
+INSERT INTO notifications (
+    id, user_id, type, title, message,
+    is_read, read_at, created_at
+) VALUES
+(1, 1, 'SYSTEM',      'Welcome to BankingApp',        'Your admin account has been activated. Please set up 2FA.',           true,  '2026-01-10 09:30:00', '2026-01-10 09:00:00'),
+(2, 1, 'SECURITY',    'New login detected',           'A login was detected from IP 192.168.1.10.',                         true,  '2026-02-02 14:31:00', '2026-02-02 14:30:00'),
+(3, 2, 'TRANSACTION', 'Deposit received',             'A deposit of Â£2,500.00 was credited to your Savings account.',       true,  '2026-01-20 10:05:00', '2026-01-20 10:00:00'),
+(4, 2, 'MARKETING',   'Special offer - 0% fees',      'Enjoy zero transaction fees for the entire month of January!',       false, NULL,                  '2026-01-15 08:00:00'),
+(5, 3, 'TRANSACTION', 'Transfer completed',           'Your transfer of Â¥50,000 to account ACC000000004 is complete.',      false, NULL,                  '2026-02-01 12:10:00'),
+(6, 3, 'SECURITY',    '2FA code requested',           'A TOTP code is required to complete your login.',                    true,  '2026-02-01 19:45:30', '2026-02-01 19:45:00');
+
+-- -----------------------------------------------------------------------------
+-- 5. ACCOUNTS
+--    Depends on: users
+--    IDs chosen to match downstream FK references throughout the file.
+-- -----------------------------------------------------------------------------
+INSERT INTO accounts (
+    id, account_number, user_id, account_type,
+    balance, currency, status,
+    is_primary,
+    created_at, updated_at
+) VALUES
+-- Prateek (admin) - Savings (primary)
+(
+    1, 'ACC000000001', 1, 'SAVINGS',
+    15000.00, 'USD', 'ACTIVE',
+    true,
+    '2026-01-10 09:00:00', '2026-02-02 14:30:00'
+),
+-- Prateek - Checking
+(
+    2, 'ACC000000002', 1, 'CHECKING',
+    3200.50, 'USD', 'ACTIVE',
+    false,
+    '2026-01-11 10:00:00', '2026-02-01 16:00:00'
+),
+-- Sunny - Savings (primary, GBP)
+(
+    3, 'ACC000000003', 2, 'SAVINGS',
+    8750.00, 'GBP', 'ACTIVE',
+    true,
+    '2026-01-12 10:00:00', '2026-02-03 08:15:00'
+),
+-- Sunny - Credit account
+(
+    4, 'ACC000000004', 2, 'CREDIT',
+    -1200.00, 'GBP', 'ACTIVE',
+    false,
+    '2026-01-13 11:00:00', '2026-02-01 09:00:00'
+),
+-- Honey - Savings (primary, CNY)
+(
+    5, 'ACC000000005', 3, 'SAVINGS',
+    120000.00, 'CNY', 'ACTIVE',
+    true,
+    '2026-01-14 11:00:00', '2026-02-01 19:45:00'
+),
+-- Honey - Checking (frozen for demo)
+(
+    6, 'ACC000000006', 3, 'CHECKING',
+    45000.00, 'CNY', 'FROZEN',
+    false,
+    '2026-01-15 12:00:00', '2026-01-30 08:00:00'
+);
+
+-- -----------------------------------------------------------------------------
+-- 6. BALANCE_HISTORY
+--    Depends on: accounts
+-- -----------------------------------------------------------------------------
+INSERT INTO balance_history (
+    id, account_id,
+    old_balance, new_balance,
+    transaction_type, description, recorded_at
+) VALUES
+(1, 1, 10000.00, 15000.00, 'DEPOSIT',      'Initial salary deposit',           '2026-01-20 09:00:00'),
+(2, 1, 15000.00, 14500.00, 'WITHDRAWAL',   'ATM withdrawal - Springfield',     '2026-01-25 14:00:00'),
+(3, 1, 14500.00, 15000.00, 'DEPOSIT',      'Freelance payment received',       '2026-02-01 10:00:00'),
+(4, 3,  5000.00,  8750.00, 'DEPOSIT',      'Salary - London office',           '2026-01-20 10:00:00'),
+(5, 3,  8750.00,  6250.00, 'TRANSFER_OUT', 'Transfer to savings ISA',          '2026-01-22 11:30:00'),
+(6, 5, 80000.00,120000.00, 'DEPOSIT',      'Year-end bonus deposit',           '2026-01-18 08:00:00');
+
+-- -----------------------------------------------------------------------------
+-- 7. BENEFICIARIES
+--    Depends on: users
+-- -----------------------------------------------------------------------------
+-- NOTE: The 'beneficiaries' table does not exist in the provided entity classes.
+-- Skipping insert for 'beneficiaries'.
+
+-- -----------------------------------------------------------------------------
+-- 8. CARDS
+--    Depends on: accounts
+-- -----------------------------------------------------------------------------
+INSERT INTO cards (
+    id, card_number, account_id, card_type,
+    cardholder_name, cvv, expiry_date,
+    daily_limit, monthly_limit, pin,
+    status, online_transactions_enabled, contactless_enabled, international_enabled,
+    currency,
+    created_at, updated_at
+) VALUES
+-- Prateek - Visa debit on Savings
+(
+    1, '4532015112830366', 1, 'DEBIT',
+    'Prateek Singh', '847', '2028-12-01',
+    5000.00, 50000.00, '1234',
+    'ACTIVE', true, true,  true,
+    'USD',
+    '2026-01-10 09:00:00', '2026-02-01 10:00:00'
+),
+-- Prateek - Mastercard credit on Checking
+(
+    2, '5425233430109903', 2, 'CREDIT',
+    'Prateek Singh', '321', '2029-06-01',
+    10000.00, 80000.00, '5678',
+    'ACTIVE', true, true,  false,
+    'USD',
+    '2026-01-11 10:00:00', '2026-01-25 08:00:00'
+),
+-- Sunny - Visa debit on Savings (GBP)
+(
+    3, '4916338506082832', 3, 'DEBIT',
+    'Sunny Chauhan', '192', '2027-09-01',
+    3000.00, 30000.00, '1111',
+    'ACTIVE', true, true,  true,
+    'GBP',
+    '2026-01-12 10:00:00', '2026-02-02 11:00:00'
+),
+-- Sunny - American Express on Credit account
+(
+    4, '374245455400126',  4, 'CREDIT',
+    'Sunny Chauhan', '784', '2028-03-01',
+    15000.00, 100000.00, '2222',
+    'BLOCKED', true, false, true,
+    'GBP',
+    '2026-01-13 11:00:00', '2026-01-30 16:00:00'
+),
+-- Honey - UnionPay debit on Savings (CNY)
+(
+    5, '6222021234567890', 5, 'DEBIT',
+    'Honey Chauhan', '563', '2029-01-01',
+    20000.00, 200000.00, '3333',
+    'ACTIVE', true, true,  false,
+    'CNY',
+    '2026-01-14 11:00:00', '2026-02-01 07:00:00'
+),
+-- Honey - Visa international on Checking (frozen account - card inactive)
+(
+    6, '4111111111111111', 6, 'DEBIT',
+    'Honey Chauhan', '410', '2027-11-01',
+    10000.00, 80000.00, '4444',
+    'INACTIVE', true, false, true,
+    'CNY',
+    '2026-01-15 12:00:00', '2026-01-30 08:00:00'
+);
+
+-- -----------------------------------------------------------------------------
+-- 9. CARD_TRANSACTIONS
+--    Depends on: cards
+-- -----------------------------------------------------------------------------
+INSERT INTO card_transactions (
+    id, card_id,
+    merchant_name, transaction_type,
+    amount, currency, status, created_at
+) VALUES
+(1, 1, 'Whole Foods Market',   'PURCHASE',  127.40, 'USD', 'COMPLETED', '2026-01-22 13:00:00'),
+(2, 1, 'Shell Gas Station',    'PURCHASE',  58.90,  'USD', 'COMPLETED', '2026-01-25 07:30:00'),
+(3, 2, 'Amazon.com',           'PURCHASE',  249.99, 'USD', 'COMPLETED', '2026-01-28 20:10:00'),
+(4, 3, 'Tesco Supermarket',    'PURCHASE',  42.15,  'GBP', 'COMPLETED', '2026-01-21 11:45:00'),
+(5, 3, 'London Underground',   'PURCHASE',  3.50,   'GBP', 'COMPLETED', '2026-02-01 08:00:00'),
+(6, 5, 'Tmall Online Shop',    'PURCHASE',  899.00, 'CNY', 'COMPLETED', '2026-01-20 16:20:00');
+
+-- -----------------------------------------------------------------------------
+-- 10. TRANSACTIONS
+--     Depends on: accounts
+-- -----------------------------------------------------------------------------
+INSERT INTO transactions (
+    id, account_id, transaction_type,
+    amount, currency,
+    reference,
+    description,
+    status, created_at
+) VALUES
+-- Deposit into Prateek's Savings
+(
+    1, 1, 'DEPOSIT',
+    5000.00, 'USD',
+    'SAL-JAN-001',
+    'Monthly salary - Jan 2026',
+    'COMPLETED',
+    '2026-01-20 09:00:00'
+),
+-- Withdrawal from Prateek's Savings
+(
+    2, 1, 'WITHDRAWAL',
+    500.00, 'USD',
+    'ATM-001-9982',
+    'ATM withdrawal - Springfield Main',
+    'COMPLETED',
+    '2026-01-25 14:00:00'
+),
+-- Transfer OUT from Prateek's Checking to beneficiary
+(
+    3, 2, 'TRANSFER_OUT',
+    750.00, 'USD',
+    'TRF-2026-0128-A',
+    'Rent payment - February',
+    'COMPLETED',
+    '2026-01-28 10:00:00'
+),
+-- Deposit into Sunny's Savings
+(
+    4, 3, 'DEPOSIT',
+    2500.00, 'GBP',
+    'INV-2025-1220',
+    'Freelance consulting - Dec invoice',
+    'COMPLETED',
+    '2026-01-20 10:00:00'
+),
+-- Pending transfer from Sunny's Credit
+(
+    5, 4, 'TRANSFER_OUT',
+    400.00, 'GBP',
+    'TRF-2026-0201-B',
+    'Online shopping spree - ASOS',
+    'PENDING',
+    '2026-02-01 15:30:00'
+),
+-- Deposit into Honey's Savings
+(
+    6, 5, 'DEPOSIT',
+    40000.00, 'CNY',
+    'BON-2026-0118',
+    'Annual bonus - Shanghai office',
+    'COMPLETED',
+    '2026-01-18 08:00:00'
+);
+
+-- -----------------------------------------------------------------------------
+-- 11. TRANSFERS
+--     Depends on: accounts
+-- -----------------------------------------------------------------------------
+INSERT INTO transfers (
+    id, from_account_id, to_account_id,
+    transfer_type, amount, currency,
+    reference, recipient_name, description,
+    status, scheduled_date, created_at
+) VALUES
+-- Internal transfer: Prateek Savings -> Prateek Checking
+(
+    1, 1, 2,
+    'INTERNAL', 800.00, 'USD',
+    'TRF-INT-00001', 'Prateek Singh', 'Top-up checking for weekly expenses',
+    'COMPLETED', NULL, '2026-01-18 12:00:00'
+),
+-- External transfer: Sunny Savings -> James Doe (beneficiary - mapped to account 1 for FK)
+(
+    2, 3, 1,
+    'EXTERNAL', 150.00, 'GBP',
+    'TRF-EXT-00002', 'James Doe', 'Birthday gift transfer',
+    'COMPLETED', NULL, '2026-01-22 16:00:00'
+),
+-- Scheduled (future) transfer: Honey Savings -> Honey Checking (account 6)
+(
+    3, 5, 6,
+    'INTERNAL', 5000.00, 'CNY',
+    'TRF-SCH-00003', 'Honey Chauhan', 'Monthly living-expenses top-up',
+    'PENDING', '2026-02-10 08:00:00', '2026-02-03 10:00:00'
+);
+
+-- -----------------------------------------------------------------------------
+-- 12. RECURRING_TRANSFERS
+--     Depends on: accounts
+-- -----------------------------------------------------------------------------
+INSERT INTO recurring_transfers (
+    id, from_account_id, to_account_id,
+    transfer_type, amount, currency,
+    frequency, start_date, end_date,
+    next_execution_date, description,
+    is_active, created_at
+) VALUES
+-- Prateek: monthly savings top-up
+(
+    1, 2, 1,
+    'INTERNAL', 1000.00, 'USD',
+    'MONTHLY', '2026-01-15', '2026-12-31',
+    '2026-02-15', 'Monthly savings contribution',
+    true, '2026-01-14 09:00:00'
+),
+-- Sunny: bi-weekly rent contribution
+(
+    2, 3, 4,
+    'INTERNAL', 600.00, 'GBP',
+    'BI_WEEKLY', '2026-01-13', NULL,
+    '2026-02-10', 'Bi-weekly credit card bill reserve',
+    true, '2026-01-12 10:00:00'
+),
+-- Honey: weekly pocket money (deactivated)
+(
+    3, 5, 6,
+    'INTERNAL', 2000.00, 'CNY',
+    'WEEKLY', '2026-01-07', '2026-03-31',
+    '2026-02-04', 'Weekly checking top-up',
+    false, '2026-01-06 08:00:00'
+);
+
+-- -----------------------------------------------------------------------------
+-- 13. LOANS
+--     Depends on: users, accounts
+-- -----------------------------------------------------------------------------
+-- NOTE: The 'loans' table does not exist in the provided entity classes.
+-- Skipping insert for 'loans'.
+
+-- -----------------------------------------------------------------------------
+-- 14. PAYMENTS
+--     Depends on: accounts
+-- -----------------------------------------------------------------------------
+INSERT INTO payments (
+    id, account_id,
+    payment_type, category,
+    amount, currency, reference,
+    payee_name, payee_account,
+    description,
+    status, scheduled_date, created_at
+) VALUES
+-- Prateek - electric bill paid
+(
+    1, 2,
+    'UTILITY', 'ELECTRICITY',
+    142.30, 'USD', 'CE-202601-98765',
+    'Commonwealth Edison', 'BLR-CE-001',
+    'January electricity bill',
+    'COMPLETED', NULL, '2026-01-25 10:00:00'
+),
+-- Sunny - internet bill (pending)
+(
+    2, 3,
+    'UTILITY', 'INTERNET',
+    45.00, 'GBP', 'BT-202602-12345',
+    'BT Broadband', 'BLR-BT-002',
+    'February broadband - auto-pay queued',
+    'PENDING', '2026-02-05 09:00:00', '2026-02-01 09:00:00'
+),
+-- Honey - mobile recharge
+(
+    3, 5,
+    'MERCHANT', 'TELECOM',
+    100.00, 'CNY', 'CM-202601-77777',
+    'China Mobile', 'BLR-CM-003',
+    'Monthly mobile plan recharge',
+    'COMPLETED', NULL, '2026-01-20 12:00:00'
+);
+
+-- -----------------------------------------------------------------------------
+-- 15. SAVED_BILLERS
+--     Depends on: users
+-- -----------------------------------------------------------------------------
+INSERT INTO saved_billers (
+    id, user_id,
+    biller_name, category, account_number,
+    nickname, created_at
+) VALUES
+(1, 1, 'Commonwealth Edison',  'UTILITY',  'CE-98765-SPR',  'Electric',    '2026-01-11 09:00:00'),
+(2, 1, 'AT&T Mobile',          'TELECOM',  'ATT-55-0101',   'Phone',       '2026-01-11 09:05:00'),
+(3, 2, 'BT Broadband',         'UTILITY',  'BT-12345-LDN',  'Internet',    '2026-01-13 10:00:00'),
+(4, 2, 'Thames Water',         'UTILITY',  'TW-44-LON',     'Water',       '2026-01-13 10:05:00'),
+(5, 3, 'China Mobile',         'TELECOM',  'CM-77777-SH',   'Mobile',      '2026-01-15 08:00:00'),
+(6, 3, 'Shanghai Electric',    'UTILITY',  'SE-99999-SH',   'Electric',    '2026-01-15 08:05:00');
+
+-- -----------------------------------------------------------------------------
+-- 16. RECURRING_PAYMENTS
+--     Depends on: accounts
+-- -----------------------------------------------------------------------------
+INSERT INTO recurring_payments (
+    id, account_id,
+    payment_type, category, amount, currency,
+    frequency, start_date, end_date,
+    next_execution_date,
+    payee_name, payee_account,
+    description, is_active, created_at
+) VALUES
+-- Prateek - monthly electric
+(
+    1, 2,
+    'UTILITY', 'ELECTRICITY', 142.30, 'USD',
+    'MONTHLY', '2026-01-25', '2026-12-25',
+    '2026-02-25',
+    'Commonwealth Edison', 'CE-98765-SPR',
+    'Auto-pay electric bill on the 25th', true, '2026-01-24 10:00:00'
+),
+-- Sunny - monthly rent
+(
+    2, 3,
+    'RENT', 'HOUSING', 1200.00, 'GBP',
+    'MONTHLY', '2026-01-01', NULL,
+    '2026-02-01',
+    'Landlord Ltd', 'EXT00000202',
+    'Monthly flat rent - Shoreditch', true, '2025-12-28 09:00:00'
+),
+-- Honey - weekly grocery budget (deactivated)
+(
+    3, 5,
+    'SHOPPING', 'GROCERIES', 500.00, 'CNY',
+    'WEEKLY', '2026-01-06', '2026-03-31',
+    '2026-02-03',
+    'Carrefour Shanghai', 'CF-SH-001',
+    'Weekly grocery allowance', false, '2026-01-05 07:00:00'
+);
+
+-- -----------------------------------------------------------------------------
+-- 17. FIXED_DEPOSITS
+--     Depends on: users, accounts
+-- -----------------------------------------------------------------------------
+-- NOTE: The 'fixed_deposits' table does not exist in the provided entity classes.
+-- Skipping insert for 'fixed_deposits'.
+
+-- -----------------------------------------------------------------------------
+-- 18. AUDIT_LOGS
+--     Depends on: users (nullable)
+-- -----------------------------------------------------------------------------
+-- NOTE: The 'audit_logs' table does not exist in the provided entity classes.
+-- Skipping insert for 'audit_logs'.
+
+-- -----------------------------------------------------------------------------
+-- Commit everything atomically.
+-- -----------------------------------------------------------------------------
+COMMIT;
+
+-- =============================================================================
+-- Quick verification - run after seeding:
+--   SELECT table_name, count
+--   FROM (
+--     SELECT 'users'               AS table_name, COUNT(*) AS count FROM users
+--     UNION ALL SELECT 'user_settings',        COUNT(*) FROM user_settings
+--     UNION ALL SELECT 'user_activities',      COUNT(*) FROM user_activities
+--     UNION ALL SELECT 'notifications',        COUNT(*) FROM notifications
+--     UNION ALL SELECT 'accounts',             COUNT(*) FROM accounts
+--     UNION ALL SELECT 'balance_history',      COUNT(*) FROM balance_history
+--     UNION ALL SELECT 'cards',                COUNT(*) FROM cards
+--     UNION ALL SELECT 'card_transactions',    COUNT(*) FROM card_transactions
+--     UNION ALL SELECT 'transactions',         COUNT(*) FROM transactions
+--     UNION ALL SELECT 'transfers',            COUNT(*) FROM transfers
+--     UNION ALL SELECT 'recurring_transfers',  COUNT(*) FROM recurring_transfers
+--     UNION ALL SELECT 'payments',             COUNT(*) FROM payments
+--     UNION ALL SELECT 'saved_billers',        COUNT(*) FROM saved_billers
+--     UNION ALL SELECT 'recurring_payments',   COUNT(*) FROM recurring_payments
+--   ) AS counts
+--   ORDER BY table_name;
+-- =============================================================================
+
+-- =============================================================================
+-- SEQUENCE CORRECTION SCRIPT
+-- Resets auto-increment sequences to the max(id) + 1 for all seeded tables
+-- Run this after seeding data to prevent "duplicate key value" errors
+-- =============================================================================
+
+BEGIN;
+
+-- Reset users sequence
+SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));
+
+-- Reset user_settings sequence
+SELECT setval('user_settings_id_seq', (SELECT MAX(id) FROM user_settings));
+
+-- Reset user_activities sequence
+SELECT setval('user_activities_id_seq', (SELECT MAX(id) FROM user_activities));
+
+-- Reset notifications sequence
+SELECT setval('notifications_id_seq', (SELECT MAX(id) FROM notifications));
+
+-- Reset accounts sequence
+SELECT setval('accounts_id_seq', (SELECT MAX(id) FROM accounts));
+
+-- Reset balance_history sequence
+SELECT setval('balance_history_id_seq', (SELECT MAX(id) FROM balance_history));
+
+-- Reset cards sequence
+SELECT setval('cards_id_seq', (SELECT MAX(id) FROM cards));
+
+-- Reset card_transactions sequence
+SELECT setval('card_transactions_id_seq', (SELECT MAX(id) FROM card_transactions));
+
+-- Reset transactions sequence
+SELECT setval('transactions_id_seq', (SELECT MAX(id) FROM transactions));
+
+-- Reset transfers sequence
+SELECT setval('transfers_id_seq', (SELECT MAX(id) FROM transfers));
+
+-- Reset recurring_transfers sequence
+SELECT setval('recurring_transfers_id_seq', (SELECT MAX(id) FROM recurring_transfers));
+
+-- Reset payments sequence
+SELECT setval('payments_id_seq', (SELECT MAX(id) FROM payments));
+
+-- Reset saved_billers sequence
+SELECT setval('saved_billers_id_seq', (SELECT MAX(id) FROM saved_billers));
+
+-- Reset recurring_payments sequence
+SELECT setval('recurring_payments_id_seq', (SELECT MAX(id) FROM recurring_payments));
+
+COMMIT;
+

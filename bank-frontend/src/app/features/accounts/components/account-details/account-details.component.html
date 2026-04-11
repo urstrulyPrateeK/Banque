@@ -1,0 +1,149 @@
+<div class="account-details-container">
+    @if (isLoading) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading account details...</p>
+        </div>
+    } @else if (error) {
+        <div class="error-state">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            <p>{{ error }}</p>
+            <button class="btn-secondary" (click)="goBack()">Go Back</button>
+        </div>
+    } @else if (account) {
+        <!-- Header -->
+        <header class="account-header">
+            <button class="back-button" (click)="goBack()">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back to Accounts
+            </button>
+
+            <div class="account-title">
+                <div class="account-type-header">
+                    <span class="account-icon-large">{{ getAccountTypeIcon(account.accountType) }}</span>
+                    <div>
+                        <h1>{{ account.nickname || account.accountType }}</h1>
+                        <p class="account-number-full">{{ formatAccountNumber(account.accountNumber) }}</p>
+                    </div>
+                </div>
+                @if (account.isPrimary) {
+                    <span class="primary-badge">Primary Account</span>
+                }
+            </div>
+        </header>
+
+        <!-- Balance Card -->
+        <div class="balance-card">
+            <div class="balance-info">
+                <p class="balance-label">Available Balance</p>
+                <p class="balance-amount">{{ account.balance | currency:account.currency }}</p>
+                @if (balance(); as balanceData) {
+                    <p class="balance-updated">Last updated: {{ balanceData.lastUpdated | date:'short' }}</p>
+                }
+            </div>
+            <div class="balance-actions">
+                <button class="btn-action" [class.disabled]="account.status !== 'ACTIVE'" (click)="onTransfer()">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 16H3a2 2 0 01-2-2V6a2 2 0 012-2h5m5 0h5a2 2 0 012 2v8a2 2 0 01-2 2h-5m-5 0h6" />
+                    </svg>
+                    Transfer
+                </button>
+                <button class="btn-action" [class.disabled]="account.status !== 'ACTIVE'" routerLink="/transfers/create" [queryParams]="{fromAccount: account.id}">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Create Transfer
+                </button>
+                <button class="btn-action" [class.disabled]="account.status !== 'ACTIVE'">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                    </svg>
+                    Pay
+                </button>
+            </div>
+        </div>
+
+        <!-- Account Info Grid -->
+        <div class="info-grid">
+            <!-- Account Summary -->
+            <div class="info-card">
+                <h2>Account Summary</h2>
+                @if (summary(); as summaryData) {
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">Account Type</span>
+                            <span class="info-value">{{ account.accountType }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="status-badge" [class]="getStatusClass(account.status)">
+                                {{ account.status }}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Currency</span>
+                            <span class="info-value">{{ account.currency }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Transactions</span>
+                            <span class="info-value">{{ summaryData.transactionCount }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Credits</span>
+                            <span class="info-value positive">{{ summaryData.totalCredits | currency:account.currency }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Debits</span>
+                            <span class="info-value negative">{{ summaryData.totalDebits | currency:account.currency }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Average Balance</span>
+                            <span class="info-value">{{ summaryData.averageBalance | currency:account.currency }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Created</span>
+                            <span class="info-value">{{ account.createdAt | date:'medium' }}</span>
+                        </div>
+                    </div>
+                } @else {
+                    <p class="loading-text">Loading summary...</p>
+                }
+            </div>
+
+            <!-- Account Actions -->
+            <div class="info-card">
+                <h2>Account Actions</h2>
+                <div class="actions-list">
+                    @if (!account.isPrimary) {
+                        <button class="action-button" (click)="onSetPrimary()">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            Set as Primary
+                        </button>
+                    }
+                    @if (account.status === 'ACTIVE') {
+                        <button class="action-button warning" (click)="onFreezeAccount()">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd" />
+                            </svg>
+                            Freeze Account
+                        </button>
+                    }
+                    @if (account.status === 'FROZEN') {
+                        <button class="action-button success" (click)="onUnfreezeAccount()">
+                            <svg viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            Unfreeze Account
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,98 @@
+############################
+# OS & Editor
+############################
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# AI / Editor tooling
+.cursor/
+.gemini/
+.codex/
+.cline/
+
+############################
+# Logs
+############################
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+############################
+# Environment files
+############################
+.env
+.env.*
+!.env.example
+
+############################
+# Node / Angular (bank-frontend)
+############################
+bank-frontend/node_modules/
+bank-frontend/dist/
+bank-frontend/.angular/
+bank-frontend/.cache/
+bank-frontend/.eslintcache
+bank-frontend/.npm/
+bank-frontend/.yarn/
+bank-frontend/coverage/
+
+# Angular CLI temp & build
+.angular/
+dist/
+coverage/
+
+############################
+# Java / Spring Boot (bank-backend)
+############################
+bank-backend/target/
+bank-backend/.classpath
+bank-backend/.project
+bank-backend/.settings/
+bank-backend/*.log
+
+############################
+# Maven / Gradle
+############################
+.mvn/wrapper/maven-wrapper.jar
+**/dependency-reduced-pom.xml
+
+############################
+# Build artifacts
+############################
+*.jar
+*.war
+*.ear
+*.class
+
+############################
+# Test & Coverage
+############################
+*.exec
+*.out
+
+############################
+# Docker
+############################
+docker-data/
+*.pid
+
+############################
+# Misc
+############################
+tmp/
+temp/
+
+############################
+# Project Blueprints
+############################
+bank-backend/blueprint.md
+bank-frontend/blueprint.md

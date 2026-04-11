@@ -1,0 +1,81 @@
+<div class="container mx-auto p-4">
+    <div class="header">
+        <h1 class="text-2xl font-bold mb-4">Payments</h1>
+    </div>
+
+    @if (isLoading()) {
+        <div>Loading payments...</div>
+    } @else if (error()) {
+        <div class="text-red-500">{{ error() }}</div>
+    } @else if (payments().length === 0) {
+        <div class="text-gray-600">No payments found.</div>
+    } @else {
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">ID</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Type</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Category</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Amount</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Status</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Date</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Receipt</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    @for (payment of payments(); track payment.id) {
+                        <tr>
+                            <td class="w-1/6 py-3 px-4">{{ payment.id }}</td>
+                            <td class="w-1/6 py-3 px-4">{{ payment.paymentType }}</td>
+                            <td class="w-1/6 py-3 px-4">{{ payment.category }}</td>
+                            <td class="w-1/6 py-3 px-4">
+                                {{ payment.amount | currency:payment.currency:'symbol':'1.2-2' }}
+                            </td>
+                            <td class="w-1/6 py-3 px-4">
+                                <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-sm">
+                                    {{ payment.status }}
+                                </span>
+                            </td>
+                            <td class="w-1/6 py-3 px-4">{{ payment.createdAt | date:'short' }}</td>
+                            <td class="w-1/6 py-3 px-4">
+                                <a class="btn btn-secondary" [routerLink]="['/payments', payment.id, 'receipt']">Receipt</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-between items-center mt-4">
+            <div>
+                <label for="pageSize" class="mr-2">Items per page:</label>
+                <select
+                    id="pageSize"
+                    [value]="pageable().size"
+                    (change)="setPageSize($any($event.target).value)">
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                </select>
+            </div>
+            <div>
+                <span>
+                    Page {{ (pagination()?.number ?? 0) + 1 }} of {{ totalPages() }}
+                </span>
+                <button
+                    class="ml-2 px-3 py-1 border rounded"
+                    [disabled]="pagination()?.first"
+                    (click)="setPage((pagination()?.number ?? 0) - 1)">
+                    Previous
+                </button>
+                <button
+                    class="ml-2 px-3 py-1 border rounded"
+                    [disabled]="pagination()?.last"
+                    (click)="setPage((pagination()?.number ?? 0) + 1)">
+                    Next
+                </button>
+            </div>
+        </div>
+    }
+</div>

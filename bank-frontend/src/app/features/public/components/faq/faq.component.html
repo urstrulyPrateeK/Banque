@@ -1,0 +1,52 @@
+<div class="faq-page">
+    <div class="page-container">
+        <header class="page-header">
+            <h1>Frequently Asked Questions</h1>
+            <p class="subtitle">Find answers to common questions about SecureBank</p>
+        </header>
+
+        <!-- Category Filter -->
+        <div class="category-filter">
+            @for (category of categories; track category.id) {
+                <button 
+                    class="category-btn"
+                    [class.active]="selectedCategory() === category.id"
+                    (click)="selectCategory(category.id)"
+                >
+                    {{ category.label }}
+                </button>
+            }
+        </div>
+
+        <!-- FAQ List -->
+        <div class="faq-list">
+            @for (faq of filteredFaqs(); track faq.question; let i = $index) {
+                <div class="faq-item" [class.open]="isOpen(i)">
+                    <button class="faq-question" (click)="toggleQuestion(i)">
+                        <span>{{ faq.question }}</span>
+                        <svg 
+                            class="chevron" 
+                            viewBox="0 0 20 20" 
+                            fill="currentColor"
+                            [class.rotated]="isOpen(i)"
+                        >
+                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    @if (isOpen(i)) {
+                        <div class="faq-answer">
+                            <p>{{ faq.answer }}</p>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Still Have Questions -->
+        <div class="help-section">
+            <h2>Still Have Questions?</h2>
+            <p>Can't find what you're looking for? Our support team is here to help.</p>
+            <a routerLink="/contact" class="btn-primary">Contact Support</a>
+        </div>
+    </div>
+</div>

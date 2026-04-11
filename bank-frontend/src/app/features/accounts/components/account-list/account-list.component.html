@@ -1,0 +1,100 @@
+<div class="account-list-container">
+    <header class="page-header">
+        <div>
+            <h1>My Accounts</h1>
+            <p class="subtitle">Manage and view all your accounts</p>
+        </div>
+        <button class="btn-primary" routerLink="/accounts/new">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            New Account
+        </button>
+    </header>
+
+    @if (accountStore.isLoading()) {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading accounts...</p>
+        </div>
+    } @else if (accountStore.error()) {
+        <div class="error-state">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            <p>{{ accountStore.error() }}</p>
+        </div>
+    } @else {
+        <!-- Summary Cards -->
+        @if (accountStore.summary(); as summary) {
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-icon">🏦</div>
+                    <div class="summary-content">
+                        <h3>Total Accounts</h3>
+                        <p class="summary-value">{{ summary.totalAccounts }}</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">✅</div>
+                    <div class="summary-content">
+                        <h3>Active Accounts</h3>
+                        <p class="summary-value">{{ summary.activeAccounts }}</p>
+                    </div>
+                </div>
+                <div class="summary-card highlight">
+                    <div class="summary-icon">💰</div>
+                    <div class="summary-content">
+                        <h3>Total Balance</h3>
+                        <p class="summary-value">{{ summary.totalBalance | currency:summary.accounts[0]?.currency || 'USD' }}</p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Accounts Grid -->
+        @if (accountStore.accounts().length > 0) {
+            <div class="accounts-grid">
+                @for (account of accountStore.accounts(); track account.id) {
+                    <div class="account-card" [class.primary]="account.isPrimary">
+                        <div class="account-header">
+                            <div class="account-type">
+                                <span class="account-icon">{{ getAccountTypeIcon(account.accountType) }}</span>
+                                <div>
+                                    <h3>{{ account.nickname || account.accountType }}</h3>
+                                    <p class="account-number">{{ formatAccountNumber(account.accountNumber) }}</p>
+                                </div>
+                            </div>
+                            @if (account.isPrimary) {
+                                <span class="primary-badge">Primary</span>
+                            }
+                        </div>
+                        
+                        <div class="account-balance">
+                            <p class="balance-label">Available Balance</p>
+                            <p class="balance-amount">{{ account.balance | currency:account.currency }}</p>
+                        </div>
+
+                        <div class="account-footer">
+                            <span class="status-badge" [class]="getStatusClass(account.status)">
+                                {{ account.status }}
+                            </span>
+                            <a [routerLink]="['/accounts', account.id]" class="view-link">
+                                View Details →
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        } @else {
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h7M21 3l-9 9M16 3h5v5" />
+                </svg>
+                <h3>No Accounts Yet</h3>
+                <p>Get started by creating your first account</p>
+                <button class="btn-primary" routerLink="/accounts/new">Create Account</button>
+            </div>
+        }
+    }
+</div>

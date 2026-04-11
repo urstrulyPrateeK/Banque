@@ -1,0 +1,61 @@
+<div class="landing-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">Banking Made Simple, Secure, and Smart</h1>
+            <p class="hero-subtitle">
+                Experience the future of banking with our comprehensive digital platform. 
+                Manage your finances with confidence and ease.
+            </p>
+            <div class="hero-actions">
+                <a routerLink="/auth/register" class="btn-primary">Get Started</a>
+                <a routerLink="/auth/login" class="btn-secondary">Sign In</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="hero-graphic">
+                <div class="floating-card card-1">💳</div>
+                <div class="floating-card card-2">💰</div>
+                <div class="floating-card card-3">📊</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            @for (stat of stats; track stat.label) {
+                <div class="stat-item">
+                    <div class="stat-value">{{ stat.value }}</div>
+                    <div class="stat-label">{{ stat.label }}</div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="section-container">
+            <h2 class="section-title">Why Choose SecureBank?</h2>
+            <p class="section-subtitle">Everything you need for modern banking in one place</p>
+            <div class="features-grid">
+                @for (feature of features; track feature.title) {
+                    <div class="feature-card">
+                        <div class="feature-icon">{{ feature.icon }}</div>
+                        <h3 class="feature-title">{{ feature.title }}</h3>
+                        <p class="feature-description">{{ feature.description }}</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2 class="cta-title">Ready to Get Started?</h2>
+            <p class="cta-subtitle">Join thousands of satisfied customers banking with SecureBank</p>
+            <a routerLink="/auth/register" class="btn-primary large">Create Your Account</a>
+        </div>
+    </section>
+</div>

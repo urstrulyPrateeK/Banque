@@ -1,0 +1,138 @@
+### Get All Payments
+GET http://localhost:8080/api/v1/payments?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Get Payment
+GET http://localhost:8080/api/v1/payments/1
+Authorization: Bearer <access-token>
+
+### Pay Bill
+POST http://localhost:8080/api/v1/payments/bills
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "billerName": "Electric Company",
+  "category": "Utilities",
+  "accountNumber": "123456789",
+  "amount": 100.00,
+  "description": "Monthly electric bill"
+}
+
+### Pay Utility
+POST http://localhost:8080/api/v1/payments/utilities
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "providerName": "Water Company",
+  "utilityType": "Water",
+  "meterNumber": "987654321",
+  "amount": 50.00,
+  "description": "Monthly water bill"
+}
+
+### Pay Merchant
+POST http://localhost:8080/api/v1/payments/merchants
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "merchantName": "Supermarket",
+  "merchantId": "MERCH123",
+  "category": "Groceries",
+  "amount": 200.00,
+  "description": "Weekly groceries"
+}
+
+### Schedule Payment
+POST http://localhost:8080/api/v1/payments/scheduled
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "paymentType": "BILL",
+  "category": "Utilities",
+  "payeeName": "Electric Company",
+  "payeeAccount": "123456789",
+  "amount": 100.00,
+  "scheduledDate": "2023-12-31",
+  "description": "Scheduled electric bill"
+}
+
+### Get Scheduled Payments
+GET http://localhost:8080/api/v1/payments/scheduled?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Cancel Payment
+POST http://localhost:8080/api/v1/payments/1/cancel
+Authorization: Bearer <access-token>
+
+### Create Recurring Payment
+POST http://localhost:8080/api/v1/payments/recurring
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "paymentType": "BILL",
+  "category": "Utilities",
+  "payeeName": "Electric Company",
+  "payeeAccount": "123456789",
+  "amount": 100.00,
+  "frequency": "MONTHLY",
+  "startDate": "2023-01-01",
+  "endDate": "2023-12-31",
+  "description": "Monthly electric bill"
+}
+
+### Get Recurring Payments
+GET http://localhost:8080/api/v1/payments/recurring?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Cancel Recurring Payment
+POST http://localhost:8080/api/v1/payments/recurring/1/cancel
+Authorization: Bearer <access-token>
+
+### Save Biller
+POST http://localhost:8080/api/v1/payments/billers
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "billerName": "Electric Company",
+  "category": "Utilities",
+  "accountNumber": "123456789",
+  "nickname": "My Electric Bill"
+}
+
+### Get Saved Billers
+GET http://localhost:8080/api/v1/payments/billers?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Delete Biller
+DELETE http://localhost:8080/api/v1/payments/billers/1
+Authorization: Bearer <access-token>
+
+### Get Payment Receipt
+GET http://localhost:8080/api/v1/payments/1/receipt
+Authorization: Bearer <access-token>
+
+### Get Pending Payments
+GET http://localhost:8080/api/v1/payments/pending?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Get Payment Statistics
+GET http://localhost:8080/api/v1/payments/statistics
+Authorization: Bearer <access-token>
+
+### Get Payment Categories
+GET http://localhost:8080/api/v1/payments/categories
+Authorization: Bearer <access-token>
+
+### Health Check
+GET http://localhost:8080/api/v1/payments/health

@@ -1,0 +1,130 @@
+<div class="contact-page">
+    <!-- Hero Section -->
+    <section class="contact-hero">
+        <div class="hero-container">
+            <h1>Contact Us</h1>
+            <p class="hero-subtitle">
+                We're here to help! Get in touch with our team for any questions or support.
+            </p>
+        </div>
+    </section>
+
+    <div class="contact-container">
+        <!-- Contact Info -->
+        <section class="contact-info-section">
+            <h2>Get in Touch</h2>
+            <div class="contact-info-grid">
+                @for (info of contactInfo; track info.title) {
+                    <div class="contact-info-card">
+                        <div class="info-icon">{{ info.icon }}</div>
+                        <h3>{{ info.title }}</h3>
+                        @if (info.link) {
+                            <a [href]="info.link" class="info-link">{{ info.content }}</a>
+                        } @else {
+                            <p>{{ info.content }}</p>
+                        }
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Contact Form -->
+        <section class="contact-form-section">
+            <h2>Send us a Message</h2>
+            @if (isSubmitted()) {
+                <div class="success-message">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <div>
+                        <h3>Thank You!</h3>
+                        <p>We've received your message and will get back to you soon.</p>
+                    </div>
+                </div>
+            } @else {
+                <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            Name <span class="required">*</span>
+                        </label>
+                        <input 
+                            id="name" 
+                            type="text" 
+                            formControlName="name" 
+                            class="form-input"
+                            placeholder="Your full name"
+                            [class.error]="getFieldError('name')"
+                        />
+                        @if (getFieldError('name'); as error) {
+                            <span class="error-message">{{ error }}</span>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">
+                            Email <span class="required">*</span>
+                        </label>
+                        <input 
+                            id="email" 
+                            type="email" 
+                            formControlName="email" 
+                            class="form-input"
+                            placeholder="your.email@example.com"
+                            [class.error]="getFieldError('email')"
+                        />
+                        @if (getFieldError('email'); as error) {
+                            <span class="error-message">{{ error }}</span>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject" class="form-label">
+                            Subject <span class="required">*</span>
+                        </label>
+                        <input 
+                            id="subject" 
+                            type="text" 
+                            formControlName="subject" 
+                            class="form-input"
+                            placeholder="What is this regarding?"
+                            [class.error]="getFieldError('subject')"
+                        />
+                        @if (getFieldError('subject'); as error) {
+                            <span class="error-message">{{ error }}</span>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message" class="form-label">
+                            Message <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            id="message" 
+                            formControlName="message" 
+                            class="form-textarea"
+                            placeholder="Tell us how we can help..."
+                            rows="6"
+                            [class.error]="getFieldError('message')"
+                        ></textarea>
+                        @if (getFieldError('message'); as error) {
+                            <span class="error-message">{{ error }}</span>
+                        }
+                    </div>
+
+                    <button 
+                        type="submit" 
+                        class="btn-submit"
+                        [disabled]="!contactForm.valid || isSubmitting()"
+                    >
+                        @if (isSubmitting()) {
+                            <span class="spinner"></span>
+                            <span>Sending...</span>
+                        } @else {
+                            <span>Send Message</span>
+                        }
+                    </button>
+                </form>
+            }
+        </section>
+    </div>
+</div>

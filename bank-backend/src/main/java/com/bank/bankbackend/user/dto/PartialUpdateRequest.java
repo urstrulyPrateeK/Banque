@@ -1,0 +1,15 @@
+package com.bank.bankbackend.user.dto;
+
+import java.time.LocalDate;
+
+public record PartialUpdateRequest(
+        String firstName,
+        String lastName,
+        String phoneNumber,
+        LocalDate dateOfBirth,
+        String address,
+        String city,
+        String state,
+        String country,
+        String postalCode
+) {}

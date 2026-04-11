@@ -1,0 +1,75 @@
+<div class="container mx-auto p-4">
+    <div class="header">
+        <h1 class="text-2xl font-bold mb-4">Cards</h1>
+    </div>
+
+    @if (isLoading()) {
+        <div>Loading cards...</div>
+    } @else if (error()) {
+        <div class="text-red-500">{{ error() }}</div>
+    } @else if (cards().length === 0) {
+        <div class="text-gray-600">No cards found.</div>
+    } @else {
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">ID</th>
+                        <th class="w-1/5 py-3 px-4 uppercase font-semibold text-sm">Type</th>
+                        <th class="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Card</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Status</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Expiry</th>
+                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Created</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    @for (card of cards(); track card.id) {
+                        <tr>
+                            <td class="w-1/6 py-3 px-4">{{ card.id }}</td>
+                            <td class="w-1/5 py-3 px-4">{{ card.cardType }}</td>
+                            <td class="w-1/4 py-3 px-4">{{ card.maskedCardNumber }}</td>
+                            <td class="w-1/6 py-3 px-4">
+                                <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-sm">
+                                    {{ card.status }}
+                                </span>
+                            </td>
+                            <td class="w-1/6 py-3 px-4">{{ card.expiryDate }}</td>
+                            <td class="w-1/6 py-3 px-4">{{ card.createdAt | date:'short' }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex justify-between items-center mt-4">
+            <div>
+                <label for="pageSize" class="mr-2">Items per page:</label>
+                <select
+                    id="pageSize"
+                    [value]="pageable().size"
+                    (change)="setPageSize($any($event.target).value)">
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                </select>
+            </div>
+            <div>
+                <span>
+                    Page {{ (pagination()?.number ?? 0) + 1 }} of {{ totalPages() }}
+                </span>
+                <button
+                    class="ml-2 px-3 py-1 border rounded"
+                    [disabled]="pagination()?.first"
+                    (click)="setPage((pagination()?.number ?? 0) - 1)">
+                    Previous
+                </button>
+                <button
+                    class="ml-2 px-3 py-1 border rounded"
+                    [disabled]="pagination()?.last"
+                    (click)="setPage((pagination()?.number ?? 0) + 1)">
+                    Next
+                </button>
+            </div>
+        </div>
+    }
+</div>

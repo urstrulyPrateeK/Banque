@@ -1,0 +1,76 @@
+<div class="about-page">
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <div class="hero-container">
+            <h1>About SecureBank</h1>
+            <p class="hero-subtitle">
+                We're on a mission to make banking simple, secure, and accessible to everyone.
+            </p>
+        </div>
+    </section>
+
+    <!-- Story Section -->
+    <section class="story-section">
+        <div class="section-container">
+            <div class="story-content">
+                <h2>Our Story</h2>
+                <p>
+                    SecureBank was founded in 2020 with a simple yet powerful vision: to democratize banking 
+                    and make financial services accessible to everyone, everywhere. We recognized that traditional 
+                    banking was becoming outdated, with complex processes and limited accessibility.
+                </p>
+                <p>
+                    Today, we serve over 2 million customers worldwide, providing them with innovative digital 
+                    banking solutions that combine cutting-edge technology with personalized service. Our platform 
+                    enables customers to manage their finances seamlessly, whether they're at home or on the go.
+                </p>
+                <p>
+                    We believe that everyone deserves access to quality financial services, and we're committed 
+                    to breaking down barriers and making banking more inclusive, transparent, and user-friendly.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values-section">
+        <div class="section-container">
+            <h2 class="section-title">Our Values</h2>
+            <div class="values-grid">
+                @for (value of values; track value.title) {
+                    <div class="value-card">
+                        <div class="value-icon">{{ value.icon }}</div>
+                        <h3>{{ value.title }}</h3>
+                        <p>{{ value.description }}</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="timeline-section">
+        <div class="section-container">
+            <h2 class="section-title">Our Journey</h2>
+            <div class="timeline">
+                @for (milestone of milestones; track milestone.year) {
+                    <div class="timeline-item">
+                        <div class="timeline-year">{{ milestone.year }}</div>
+                        <div class="timeline-content">
+                            <p>{{ milestone.event }}</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-container">
+            <h2>Join Us on Our Mission</h2>
+            <p>Be part of the future of banking</p>
+            <a routerLink="/auth/register" class="btn-primary">Get Started</a>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,147 @@
+<div class="dashboard">
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <div class="welcome-content">
+            <h1>{{ greeting() }}, {{ authStore.fullName() || 'User' }}!</h1>
+            <p>Here's what's happening with your finances today.</p>
+        </div>
+    </section>
+
+    <!-- Stats Cards -->
+    <section class="stats-grid">
+        <div class="stat-card total-balance">
+            <div class="stat-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Total Balance</span>
+                <span class="stat-value">{{ totalBalance() | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card income">
+            <div class="stat-icon positive">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Monthly Income</span>
+                <span class="stat-value positive">{{ monthlyIncome() | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card expenses">
+            <div class="stat-icon negative">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Monthly Expenses</span>
+                <span class="stat-value negative">{{ monthlyExpenses() | currency:'USD':'symbol':'1.2-2' }}</span>
+            </div>
+        </div>
+
+        <div class="stat-card savings">
+            <div class="stat-icon savings-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            </div>
+            <div class="stat-content">
+                <span class="stat-label">Savings Rate</span>
+                <span class="stat-value">{{ savingsRate() }}%</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="quick-actions-section">
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="quick-actions-grid">
+            @for (action of quickActions; track action.id) {
+            <a [routerLink]="action.route" class="quick-action-card" [attr.data-color]="action.color">
+                <div class="action-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path [attr.d]="action.icon" />
+                    </svg>
+                </div>
+                <span class="action-title">{{ action.title }}</span>
+            </a>
+            }
+        </div>
+    </section>
+
+    <div class="dashboard-grid">
+        <!-- Accounts Section -->
+        <section class="accounts-section card">
+            <div class="card-header">
+                <h2 class="section-title">My Accounts</h2>
+                <a routerLink="/accounts" class="view-all">View All</a>
+            </div>
+            <div class="accounts-list">
+                @if (accounts().length > 0) {
+                    @for (account of accounts(); track account.id) {
+                    <a [routerLink]="['/accounts', account.id]" class="account-item">
+                        <div class="account-icon" [attr.data-type]="account.type">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                        </div>
+                        <div class="account-info">
+                            <span class="account-name">{{ account.name }}</span>
+                            <span class="account-number">{{ account.number }}</span>
+                        </div>
+                        <span class="account-balance">{{ account.balance | currency:account.currency:'symbol':'1.2-2' }}</span>
+                    </a>
+                    }
+                } @else {
+                    <div class="empty-accounts">
+                        <p>No accounts yet. Create your first account to get started.</p>
+                        <a routerLink="/accounts" class="create-account-link">Create Account</a>
+                    </div>
+                }
+            </div>
+        </section>
+
+        <!-- Recent Transactions -->
+        <section class="transactions-section card">
+            <div class="card-header">
+                <h2 class="section-title">Recent Transactions</h2>
+                <a routerLink="/transactions" class="view-all">View All</a>
+            </div>
+            <div class="transactions-list">
+                @for (tx of recentTransactions(); track tx.id) {
+                <div class="transaction-item">
+                    <div class="transaction-icon" [attr.data-type]="tx.type">
+                        @if (tx.type === 'credit') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 19V5m0 0l-7 7m7-7l7 7" />
+                        </svg>
+                        } @else {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14m0 0l7-7m-7 7l-7-7" />
+                        </svg>
+                        }
+                    </div>
+                    <div class="transaction-info">
+                        <span class="transaction-desc">{{ tx.description }}</span>
+                        <span class="transaction-date">{{ tx.date | date:'MMM d, yyyy' }}</span>
+                    </div>
+                    <span class="transaction-amount" [class.positive]="tx.type === 'credit'"
+                        [class.negative]="tx.type === 'debit'">
+                        {{ tx.amount | currency:'USD':'symbol':'1.2-2' }}
+                    </span>
+                </div>
+                }
+            </div>
+        </section>
+    </div>
+</div>

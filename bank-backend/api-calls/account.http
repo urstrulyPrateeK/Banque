@@ -1,0 +1,85 @@
+### Get All Accounts
+GET http://localhost:8080/api/v1/accounts?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Create Account
+POST http://localhost:8080/api/v1/accounts
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountType": "SAVINGS",
+  "currency": "USD",
+  "nickname": "My Savings"
+}
+
+### Get Account
+GET http://localhost:8080/api/v1/accounts/1
+Authorization: Bearer <access-token>
+
+### Update Account
+PATCH http://localhost:8080/api/v1/accounts/1
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "nickname": "Updated Savings"
+}
+
+### Close Account
+DELETE http://localhost:8080/api/v1/accounts/1
+Authorization: Bearer <access-token>
+
+### Get Account Balance
+GET http://localhost:8080/api/v1/accounts/1/balance
+Authorization: Bearer <access-token>
+
+### Get Account Summary
+GET http://localhost:8080/api/v1/accounts/1/summary
+Authorization: Bearer <access-token>
+
+### Get Account Statement
+GET http://localhost:8080/api/v1/accounts/1/statement?startDate=2023-01-01&endDate=2023-12-31
+Authorization: Bearer <access-token>
+
+### Download Account Statement
+POST http://localhost:8080/api/v1/accounts/1/statement/download
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "startDate": "2023-01-01",
+  "endDate": "2023-12-31",
+  "format": "pdf"
+}
+
+### Freeze Account
+PUT http://localhost:8080/api/v1/accounts/1/freeze?reason=SuspiciousActivity
+Authorization: Bearer <access-token>
+
+### Unfreeze Account
+PUT http://localhost:8080/api/v1/accounts/1/unfreeze
+Authorization: Bearer <access-token>
+
+### Set Primary Account
+PUT http://localhost:8080/api/v1/accounts/1/primary
+Authorization: Bearer <access-token>
+
+### Get Balance History
+GET http://localhost:8080/api/v1/accounts/1/balance/history?startDate=2023-01-01&endDate=2023-12-31&pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Get Account Types
+GET http://localhost:8080/api/v1/accounts/types
+Authorization: Bearer <access-token>
+
+### Get All Accounts Summary
+GET http://localhost:8080/api/v1/accounts/summary
+Authorization: Bearer <access-token>
+
+### Get Account Statistics
+GET http://localhost:8080/api/v1/accounts/statistics
+Authorization: Bearer <access-token>
+
+### Health Check
+GET http://localhost:8080/api/v1/accounts/health

@@ -1,0 +1,121 @@
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <div class="logo-container">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" />
+                </svg>
+            </div>
+            <h1>Create Account</h1>
+            <p class="subtitle">Join SecureBank today</p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+            <div class="form-group">
+                <label for="username" class="form-label">Username <span class="required">*</span></label>
+                <input id="username" type="text" formControlName="username" class="form-input" placeholder="johndoe"
+                    autocomplete="username" [class.error]="getFieldError('username')" />
+                @if (getFieldError('username'); as error) {
+                <span class="error-message">{{ error }}</span>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email <span class="required">*</span></label>
+                <input id="email" type="email" formControlName="email" class="form-input"
+                    placeholder="john.doe@email.com" autocomplete="email" [class.error]="getFieldError('email')" />
+                @if (getFieldError('email'); as error) {
+                <span class="error-message">{{ error }}</span>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password <span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
+                        class="form-input" placeholder="Min 8 characters" autocomplete="new-password"
+                        [class.error]="getFieldError('password')" />
+                    <button type="button" class="password-toggle" (click)="togglePasswordVisibility('password')">
+                        @if (showPassword()) {
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        } @else {
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        }
+                    </button>
+                </div>
+                @if (getFieldError('password'); as error) {
+                <span class="error-message">{{ error }}</span>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword" class="form-label">Confirm Password <span class="required">*</span></label>
+                <div class="input-wrapper">
+                    <input id="confirmPassword" [type]="showConfirmPassword() ? 'text' : 'password'"
+                        formControlName="confirmPassword" class="form-input" placeholder="Repeat your password"
+                        autocomplete="new-password" [class.error]="!passwordsMatch()" />
+                    <button type="button" class="password-toggle" (click)="togglePasswordVisibility('confirm')">
+                        @if (showConfirmPassword()) {
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        } @else {
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        }
+                    </button>
+                </div>
+                @if (!passwordsMatch()) {
+                <span class="error-message">Passwords do not match</span>
+                }
+            </div>
+
+            <label class="checkbox-label">
+                <input type="checkbox" formControlName="acceptTerms" />
+                <span>I accept the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy"
+                        target="_blank">Privacy Policy</a></span>
+            </label>
+
+            @if (authStore.error(); as error) {
+            <div class="alert alert-error" role="alert">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clip-rule="evenodd" />
+                </svg>
+                <span>{{ error }}</span>
+            </div>
+            }
+
+            <button type="submit" class="submit-button" [class.loading]="authStore.isLoading()">
+                @if (authStore.isLoading()) {
+                <span class="spinner"></span>
+                <span>Creating Account...</span>
+                } @else {
+                <span>Create Account</span>
+                }
+            </button>
+        </form>
+
+        <div class="login-link">
+            <p>Already have an account?</p>
+            <a routerLink="/auth/login">Sign In</a>
+        </div>
+    </div>
+    <div class="background-pattern"></div>
+</div>

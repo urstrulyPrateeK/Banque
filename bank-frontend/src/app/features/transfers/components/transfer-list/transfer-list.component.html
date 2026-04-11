@@ -1,0 +1,176 @@
+<div class="container">
+  <div class="header">
+    <h1>Transfers</h1>
+    <div class="actions">
+      <button class="btn btn-primary" routerLink="/transfers/create">
+        Create Transfer
+      </button>
+    </div>
+  </div>
+
+  <div class="view-tabs">
+    <button class="tab-btn" [class.active]="view() === 'all'" (click)="setView('all')">All</button>
+    <button class="tab-btn" [class.active]="view() === 'pending'" (click)="setView('pending')">Pending</button>
+    <button class="tab-btn" [class.active]="view() === 'scheduled'" (click)="setView('scheduled')">Scheduled</button>
+    <button class="tab-btn" [class.active]="view() === 'recurring'" (click)="setView('recurring')">Recurring</button>
+  </div>
+
+  <div class="tools">
+    <div class="tool-actions">
+      <button class="btn btn-secondary" (click)="loadStatistics()">Load Statistics</button>
+      <button class="btn btn-secondary" (click)="loadLimits()">Load Limits</button>
+    </div>
+    <div class="verify">
+      <input
+        class="form-control"
+        placeholder="Verify account number"
+        [value]="verifyAccountNumber()"
+        (input)="verifyAccountNumber.set($any($event.target).value)" />
+      <button class="btn btn-secondary" (click)="verifyAccount()">Verify</button>
+    </div>
+    @if (transferStore.accountVerification()) {
+      <div class="verify-result">
+        {{ transferStore.accountVerification()?.message }}
+      </div>
+    }
+    @if (transferStore.transferStats()) {
+      <div class="stats">
+        <span>Total: {{ transferStore.transferStats()?.totalTransfers }}</span>
+        <span>Internal: {{ transferStore.transferStats()?.internalTransfers }}</span>
+        <span>External: {{ transferStore.transferStats()?.externalTransfers }}</span>
+        <span>Pending: {{ transferStore.transferStats()?.pendingTransfers }}</span>
+      </div>
+    }
+    @if (transferStore.transferLimits()) {
+      <div class="limits">
+        <span>Max Internal: {{ transferStore.transferLimits()?.maxInternalTransfer }}</span>
+        <span>Max External: {{ transferStore.transferLimits()?.maxExternalTransfer }}</span>
+        <span>Daily: {{ transferStore.transferLimits()?.dailyLimit }}</span>
+      </div>
+    }
+  </div>
+
+  @if (transferStore.isLoading()) {
+    <div class="loading">
+      <p>Loading transfers...</p>
+    </div>
+  } @else if (transferStore.error()) {
+    <div class="error">
+      <p>Error: {{ transferStore.error() }}</p>
+      <button class="btn btn-secondary" (click)="transferStore.loadTransfers()">Retry</button>
+    </div>
+  } @else if (isRecurringView() ? recurringTransfers().length === 0 : nonRecurringTransfers().length === 0) {
+    <div class="empty-state">
+      <p>No transfers found.</p>
+      <p class="hint">Create your first transfer to get started.</p>
+    </div>
+  } @else {
+    <div class="transfers-grid">
+      @if (isRecurringView()) {
+        @for (transfer of recurringTransfers(); track transfer.id) {
+          <div class="transfer-card">
+            <div class="transfer-header">
+              <div class="transfer-type">{{ transfer.transferType }}</div>
+              <div class="transfer-status" [class]="transfer.isActive ? 'completed' : 'cancelled'">
+                {{ transfer.isActive ? 'ACTIVE' : 'CANCELLED' }}
+              </div>
+            </div>
+            <div class="transfer-details">
+              <div class="amount">
+                {{ transfer.currency }} {{ transfer.amount | number:'1.2-2' }}
+              </div>
+              <div class="recipient">
+                To: {{ transfer.toAccountId || 'Account Transfer' }}
+              </div>
+              <div class="date">
+                {{ transfer.createdAt | date:'MMM d, yyyy HH:mm' }}
+              </div>
+              <div class="date">
+                Frequency: {{ transfer.frequency }}
+              </div>
+              <div class="date">
+                Next: {{ transfer.nextExecutionDate | date:'MMM d, yyyy' }}
+              </div>
+            </div>
+            @if (transfer.description) {
+              <div class="transfer-description">
+                {{ transfer.description }}
+              </div>
+            }
+            <div class="card-actions">
+              @if (transfer.isActive) {
+                <button class="btn btn-secondary" (click)="transferStore.cancelRecurringTransfer(transfer.id)">Cancel Recurring</button>
+              }
+            </div>
+          </div>
+        }
+      } @else {
+        @for (transfer of nonRecurringTransfers(); track transfer.id) {
+          <div class="transfer-card">
+            <div class="transfer-header">
+              <div class="transfer-type">{{ transfer.transferType }}</div>
+              <div class="transfer-status" [class]="(transfer.status || 'COMPLETED').toLowerCase()">
+                {{ transfer.status || 'COMPLETED' }}
+              </div>
+            </div>
+            <div class="transfer-details">
+              <div class="amount">
+                {{ transfer.currency }} {{ transfer.amount | number:'1.2-2' }}
+              </div>
+              <div class="recipient">
+                To: {{ transfer.recipientName || transfer.toAccountId || 'Account Transfer' }}
+              </div>
+              @if (transfer.reference) {
+                <div class="reference">
+                  Ref: {{ transfer.reference }}
+                </div>
+              }
+              <div class="date">
+                {{ transfer.createdAt | date:'MMM d, yyyy HH:mm' }}
+              </div>
+              @if (view() === 'scheduled') {
+                <div class="date">
+                  Scheduled: {{ transfer.scheduledDate | date:'MMM d, yyyy' }}
+                </div>
+              }
+            </div>
+            @if (transfer.description) {
+              <div class="transfer-description">
+                {{ transfer.description }}
+              </div>
+            }
+            <div class="card-actions">
+              @if (transfer.status === 'PENDING') {
+                <button class="btn btn-secondary" (click)="transferStore.cancelTransfer(transfer.id)">Cancel</button>
+              }
+              @if (transfer.status === 'COMPLETED') {
+                <a class="btn btn-secondary" [routerLink]="['/transfers', transfer.id, 'receipt']">Receipt</a>
+              }
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="btn btn-secondary"
+          (click)="setPage((currentPagination()?.number ?? 0) - 1)"
+          [disabled]="(currentPagination()?.number ?? 0) === 0">
+          Previous
+        </button>
+        <span class="page-info">
+          Page {{ (currentPagination()?.number ?? 0) + 1 }} of {{ totalPages() }}
+        </span>
+        <button
+          class="btn btn-secondary"
+          (click)="setPage((currentPagination()?.number ?? 0) + 1)"
+          [disabled]="(currentPagination()?.number ?? 0) >= totalPages() - 1">
+          Next
+        </button>
+      </div>
+    }
+  }
+</div>

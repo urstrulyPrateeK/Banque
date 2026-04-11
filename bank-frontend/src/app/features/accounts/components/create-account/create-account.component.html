@@ -1,0 +1,130 @@
+<div class="create-account-container">
+    <header class="page-header">
+        <div>
+            <button class="back-button" (click)="onCancel()">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back
+            </button>
+            <h1>Create New Account</h1>
+            <p class="subtitle">Open a new account to start managing your finances</p>
+        </div>
+    </header>
+
+    <div class="form-container">
+        <form [formGroup]="createAccountForm" (ngSubmit)="onSubmit()" class="create-account-form">
+            <!-- Account Type -->
+            <div class="form-group">
+                <label for="accountType" class="form-label">
+                    Account Type
+                    <span class="required">*</span>
+                </label>
+                @if (isLoadingTypes()) {
+                    <div class="loading-options">Loading account types...</div>
+                } @else {
+                    <div class="account-type-grid">
+                        @for (type of accountTypes(); track type) {
+                            <label class="account-type-option" [class.selected]="createAccountForm.get('accountType')?.value === type">
+                                <input 
+                                    type="radio" 
+                                    id="accountType-{{ type }}" 
+                                    formControlName="accountType" 
+                                    [value]="type"
+                                    class="radio-input"
+                                />
+                                <div class="option-content">
+                                    <span class="option-icon">{{ getAccountTypeIcon(type) }}</span>
+                                    <div>
+                                        <span class="option-label">{{ type }}</span>
+                                        <span class="option-description">
+                                            @switch (type.toUpperCase()) {
+                                                @case ('SAVINGS') {
+                                                    Earn interest on your savings
+                                                }
+                                                @case ('CHECKING') {
+                                                    Daily transactions and payments
+                                                }
+                                                @case ('BUSINESS') {
+                                                    For business operations
+                                                }
+                                                @default {
+                                                    General purpose account
+                                                }
+                                            }
+                                        </span>
+                                    </div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                }
+                @if (getFieldError('accountType'); as error) {
+                    <span class="error-message">{{ error }}</span>
+                }
+            </div>
+
+            <!-- Currency -->
+            <div class="form-group">
+                <label for="currency" class="form-label">
+                    Currency
+                    <span class="required">*</span>
+                </label>
+                <select 
+                    id="currency" 
+                    formControlName="currency" 
+                    class="form-select"
+                    [class.error]="getFieldError('currency')"
+                >
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="GBP">GBP - British Pound</option>
+                    <option value="JPY">JPY - Japanese Yen</option>
+                    <option value="CAD">CAD - Canadian Dollar</option>
+                    <option value="AUD">AUD - Australian Dollar</option>
+                </select>
+                @if (getFieldError('currency'); as error) {
+                    <span class="error-message">{{ error }}</span>
+                }
+            </div>
+
+            <!-- Nickname (Optional) -->
+            <div class="form-group">
+                <label for="nickname" class="form-label">
+                    Account Nickname
+                    <span class="optional">(Optional)</span>
+                </label>
+                <input 
+                    id="nickname" 
+                    type="text" 
+                    formControlName="nickname" 
+                    class="form-input"
+                    placeholder="e.g., My Savings, Emergency Fund"
+                    [class.error]="getFieldError('nickname')"
+                    maxlength="50"
+                />
+                <div class="input-hint">
+                    Give your account a friendly name to easily identify it
+                </div>
+                @if (getFieldError('nickname'); as error) {
+                    <span class="error-message">{{ error }}</span>
+                }
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" (click)="onCancel()" [disabled]="isSubmitting()">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary" [disabled]="!createAccountForm.valid || isSubmitting()">
+                    @if (isSubmitting()) {
+                        <span class="spinner"></span>
+                        <span>Creating...</span>
+                    } @else {
+                        <span>Create Account</span>
+                    }
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

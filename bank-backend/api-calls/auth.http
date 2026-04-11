@@ -1,0 +1,80 @@
+### Register User
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "username": "john",
+  "email": "john@example.com",
+  "password": "StrongPass123"
+}
+
+### Login
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "honey",
+  "password": "StrongPass123"
+}
+
+### Refresh Token
+POST http://localhost:8080/api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "<your-refresh-token>"
+}
+
+### Logout
+POST http://localhost:8080/api/v1/auth/logout
+Content-Type: application/json
+Authorization: Bearer <access-token>
+
+{
+  "refreshToken": "<your-refresh-token>"
+}
+
+### Verify OTP
+POST http://localhost:8080/api/v1/auth/verify-otp
+Content-Type: application/json
+
+{
+  "sessionId": "<session-id>",
+  "otp": "123456"
+}
+
+### Verify Email
+POST http://localhost:8080/api/v1/auth/verify-email
+Content-Type: application/json
+
+{
+  "verificationToken": "<verification-token>"
+}
+
+### Forgot Password
+POST http://localhost:8080/api/v1/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "honey@example.com"
+}
+
+### Reset Password
+POST http://localhost:8080/api/v1/auth/reset-password
+Content-Type: application/json
+
+{
+  "resetToken": "<reset-token>",
+  "newPassword": "NewStrongPass123"
+}
+
+### Resend Verification Email
+POST http://localhost:8080/api/v1/auth/resend-verification
+Content-Type: application/json
+
+{
+  "email": "honey@example.com"
+}
+
+### Health Check
+GET http://localhost:8080/api/v1/auth/health

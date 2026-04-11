@@ -1,0 +1,87 @@
+.privacy-page {
+    min-height: 100vh;
+    background: #f7fafc;
+    padding: 4rem 2rem;
+}
+
+.page-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 3rem;
+}
+
+.page-header {
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 2rem;
+    margin-bottom: 3rem;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 0.5rem 0;
+}
+
+.last-updated {
+    color: #718096;
+    margin: 0;
+}
+
+.content {
+    line-height: 1.8;
+    color: #4a5568;
+}
+
+.content section {
+    margin-bottom: 3rem;
+}
+
+.content h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0 0 1rem 0;
+}
+
+.content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+.content p {
+    margin: 0 0 1rem 0;
+}
+
+.content ul {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.content li {
+    margin-bottom: 0.5rem;
+}
+
+.content strong {
+    color: #1a202c;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .privacy-page {
+        padding: 2rem 1rem;
+    }
+
+    .page-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+    }
+}

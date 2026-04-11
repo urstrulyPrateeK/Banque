@@ -1,0 +1,104 @@
+### Get All Transfers
+GET http://localhost:8080/api/v1/transfers?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Get Transfer
+GET http://localhost:8080/api/v1/transfers/1
+Authorization: Bearer <access-token>
+
+### Internal Transfer
+POST http://localhost:8080/api/v1/transfers/internal
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "fromAccountId": 1,
+  "toAccountId": 2,
+  "amount": 100.00,
+  "description": "Transfer to savings"
+}
+
+### External Transfer
+POST http://localhost:8080/api/v1/transfers/external
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "fromAccountId": 1,
+  "toAccountNumber": "1234567890",
+  "amount": 50.00,
+  "recipientName": "John Doe",
+  "description": "Payment for services"
+}
+
+### Verify Account
+POST http://localhost:8080/api/v1/transfers/verify-account
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountNumber": "1234567890"
+}
+
+### Scheduled Transfer
+POST http://localhost:8080/api/v1/transfers/scheduled
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "fromAccountId": 1,
+  "toAccountId": 2,
+  "amount": 100.00,
+  "scheduledDate": "2023-12-31",
+  "description": "Scheduled transfer"
+}
+
+### Get Scheduled Transfers
+GET http://localhost:8080/api/v1/transfers/scheduled?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Cancel Transfer
+POST http://localhost:8080/api/v1/transfers/1/cancel
+Authorization: Bearer <access-token>
+
+### Recurring Transfer
+POST http://localhost:8080/api/v1/transfers/recurring
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "fromAccountId": 1,
+  "toAccountId": 2,
+  "amount": 100.00,
+  "frequency": "MONTHLY",
+  "startDate": "2023-01-01",
+  "endDate": "2023-12-31",
+  "description": "Monthly savings"
+}
+
+### Get Recurring Transfers
+GET http://localhost:8080/api/v1/transfers/recurring?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Cancel Recurring Transfer
+POST http://localhost:8080/api/v1/transfers/recurring/1/cancel
+Authorization: Bearer <access-token>
+
+### Get Transfer Receipt
+GET http://localhost:8080/api/v1/transfers/1/receipt
+Authorization: Bearer <access-token>
+
+### Get Pending Transfers
+GET http://localhost:8080/api/v1/transfers/pending?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Get Transfer Statistics
+GET http://localhost:8080/api/v1/transfers/statistics
+Authorization: Bearer <access-token>
+
+### Get Transfer Limits
+GET http://localhost:8080/api/v1/transfers/limits
+Authorization: Bearer <access-token>
+
+### Health Check
+GET http://localhost:8080/api/v1/transfers/health

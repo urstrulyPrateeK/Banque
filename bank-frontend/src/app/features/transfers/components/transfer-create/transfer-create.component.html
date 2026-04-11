@@ -1,0 +1,255 @@
+<div class="transfer-create-container">
+  <div class="header">
+    <button class="back-button" (click)="onCancel()">
+      <svg viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+      </svg>
+      Back to Transfers
+    </button>
+    <h1>Create Transfer</h1>
+  </div>
+
+  @if (error()) {
+    <div class="error-banner">
+      <p>{{ error() }}</p>
+    </div>
+  }
+
+  <form [formGroup]="transferForm" (ngSubmit)="onSubmit()" class="transfer-form">
+    <div class="form-section">
+      <h2>Transfer Details</h2>
+
+      <!-- Transfer Type -->
+      <div class="form-group">
+        <label for="transferType">Transfer Type</label>
+        <select id="transferType" formControlName="transferType" class="form-control">
+          @for (type of transferTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- From Account -->
+      <div class="form-group">
+        <label for="fromAccountId">From Account</label>
+        <select id="fromAccountId" formControlName="fromAccountId" class="form-control">
+          <option value="">Select source account</option>
+          @for (account of accounts(); track account.id) {
+            <option [value]="account.id">
+              {{ account.accountType }} - {{ account.accountNumber }} ({{ account.currency }} {{ account.balance | currency:account.currency:'symbol':'1.2-2' }})
+            </option>
+          }
+        </select>
+        @if (transferForm.get('fromAccountId')?.invalid && transferForm.get('fromAccountId')?.touched) {
+          <div class="error-message">Please select a source account</div>
+        }
+      </div>
+
+      <!-- To Account (Internal/Scheduled/Recurring) -->
+      @if (transferForm.get('transferType')?.value !== 'EXTERNAL') {
+        <div class="form-group">
+          <label for="toAccountId">To Account (Internal)</label>
+          <select id="toAccountId" formControlName="toAccountId" class="form-control">
+            <option value="">Select destination account</option>
+            @for (account of accounts(); track account.id) {
+              @if (account.id !== transferForm.get('fromAccountId')?.value) {
+                <option [value]="account.id">
+                  {{ account.accountType }} - {{ account.accountNumber }} ({{ account.currency }} {{ account.balance | currency:account.currency:'symbol':'1.2-2' }})
+                </option>
+              }
+            }
+          </select>
+          @if (transferForm.get('toAccountId')?.invalid && transferForm.get('toAccountId')?.touched) {
+            <div class="error-message">Please select a destination account</div>
+          }
+        </div>
+      }
+
+      <!-- External Account Number -->
+      @if (transferForm.get('transferType')?.value !== 'INTERNAL') {
+        <div class="form-group">
+          <label for="toAccountNumber">To Account Number (External)</label>
+          <input
+            id="toAccountNumber"
+            type="text"
+            formControlName="toAccountNumber"
+            class="form-control"
+            placeholder="Enter destination account number">
+          @if (transferForm.get('toAccountNumber')?.invalid && transferForm.get('toAccountNumber')?.touched) {
+            <div class="error-message">Destination account number is required for external transfers</div>
+          }
+        </div>
+      }
+
+      <!-- Recipient Name (External) -->
+      @if (transferForm.get('transferType')?.value === 'EXTERNAL') {
+        <div class="form-group">
+          <label for="recipientName">Recipient Name</label>
+          <input
+            id="recipientName"
+            type="text"
+            formControlName="recipientName"
+            class="form-control"
+            placeholder="Enter recipient name">
+          @if (transferForm.get('recipientName')?.invalid && transferForm.get('recipientName')?.touched) {
+            <div class="error-message">Recipient name is required for external transfers</div>
+          }
+        </div>
+      }
+
+      <!-- Scheduled Date -->
+      @if (transferForm.get('transferType')?.value === 'SCHEDULED') {
+        <div class="form-group">
+          <label for="scheduledDate">Scheduled Date</label>
+          <input
+            id="scheduledDate"
+            type="date"
+            formControlName="scheduledDate"
+            class="form-control">
+          @if (transferForm.get('scheduledDate')?.invalid && transferForm.get('scheduledDate')?.touched) {
+            <div class="error-message">Scheduled date is required</div>
+          }
+        </div>
+      }
+
+      <!-- Recurring Settings -->
+      @if (transferForm.get('transferType')?.value === 'RECURRING') {
+        <div class="form-group">
+          <label for="frequency">Frequency</label>
+          <select id="frequency" formControlName="frequency" class="form-control">
+            <option value="">Select frequency</option>
+            <option value="DAILY">DAILY</option>
+            <option value="WEEKLY">WEEKLY</option>
+            <option value="BIWEEKLY">BIWEEKLY</option>
+            <option value="MONTHLY">MONTHLY</option>
+            <option value="QUARTERLY">QUARTERLY</option>
+            <option value="YEARLY">YEARLY</option>
+          </select>
+          @if (transferForm.get('frequency')?.invalid && transferForm.get('frequency')?.touched) {
+            <div class="error-message">Frequency is required</div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="startDate">Start Date</label>
+          <input
+            id="startDate"
+            type="date"
+            formControlName="startDate"
+            class="form-control">
+          @if (transferForm.get('startDate')?.invalid && transferForm.get('startDate')?.touched) {
+            <div class="error-message">Start date is required</div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="endDate">End Date (Optional)</label>
+          <input
+            id="endDate"
+            type="date"
+            formControlName="endDate"
+            class="form-control">
+        </div>
+      }
+
+      <!-- Amount -->
+      <div class="form-group">
+        <label for="amount">Amount</label>
+        <input
+          type="number"
+          id="amount"
+          formControlName="amount"
+          class="form-control"
+          step="0.01"
+          min="0.01"
+          placeholder="0.00">
+        @if (transferForm.get('amount')?.invalid && transferForm.get('amount')?.touched) {
+          <div class="error-message">
+            @if (transferForm.get('amount')?.errors?.['min']) {
+              Amount must be greater than 0
+            } @else {
+              Please enter a valid amount
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">Description (Optional)</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-control"
+          rows="3"
+          placeholder="Enter transfer description"></textarea>
+        <div class="character-count">{{ transferForm.get('description')?.value?.length || 0 }}/200</div>
+      </div>
+    </div>
+
+    <!-- Preview Section -->
+    @if (canTransfer && transferForm.valid) {
+      <div class="preview-section">
+        <h3>Transfer Preview</h3>
+        <div class="preview-details">
+          <div class="preview-row">
+            <span class="label">From:</span>
+            <span class="value">{{ fromAccount?.accountType }} - {{ fromAccount?.accountNumber }}</span>
+          </div>
+          <div class="preview-row">
+            <span class="label">To:</span>
+            <span class="value">
+              @if (transferForm.get('transferType')?.value === 'EXTERNAL') {
+                {{ transferForm.get('toAccountNumber')?.value }}
+              } @else {
+                {{ toAccount?.accountType }} - {{ toAccount?.accountNumber }}
+              }
+            </span>
+          </div>
+          <div class="preview-row">
+            <span class="label">Amount:</span>
+            <span class="value amount">{{ transferForm.get('amount')?.value | currency:fromAccount?.currency }}</span>
+          </div>
+          <div class="preview-row">
+            <span class="label">Type:</span>
+            <span class="value">{{ transferForm.get('transferType')?.value }}</span>
+          </div>
+          @if (transferForm.get('transferType')?.value === 'SCHEDULED') {
+            <div class="preview-row">
+              <span class="label">Scheduled Date:</span>
+              <span class="value">{{ transferForm.get('scheduledDate')?.value }}</span>
+            </div>
+          }
+          @if (transferForm.get('transferType')?.value === 'RECURRING') {
+            <div class="preview-row">
+              <span class="label">Frequency:</span>
+              <span class="value">{{ transferForm.get('frequency')?.value }}</span>
+            </div>
+            <div class="preview-row">
+              <span class="label">Start Date:</span>
+              <span class="value">{{ transferForm.get('startDate')?.value }}</span>
+            </div>
+          }
+          <div class="preview-row">
+            <span class="label">Description:</span>
+            <span class="value">{{ transferForm.get('description')?.value || 'No description' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="transferForm.invalid || !canTransfer || isLoading()">
+        @if (isLoading()) {
+          <span class="spinner"></span>
+          Processing...
+        } @else {
+          Create Transfer
+        }
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,66 @@
+<div class="otp-container">
+    <div class="otp-card">
+        <div class="otp-header">
+            <div class="icon-container">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <h1>Two-Factor Authentication</h1>
+            <p class="subtitle">Enter the 6-digit code sent to your device</p>
+        </div>
+
+        <form [formGroup]="otpForm" (ngSubmit)="onSubmit()" class="otp-form">
+            <div class="otp-inputs" (paste)="onPaste($event)">
+                <input #input1 type="text" maxlength="1" formControlName="digit1" class="otp-input" inputmode="numeric"
+                    autocomplete="one-time-code" (input)="onDigitInput($event, input2)" />
+                <input #input2 type="text" maxlength="1" formControlName="digit2" class="otp-input" inputmode="numeric"
+                    (input)="onDigitInput($event, input3)" (keydown)="onKeyDown($event, input1)" />
+                <input #input3 type="text" maxlength="1" formControlName="digit3" class="otp-input" inputmode="numeric"
+                    (input)="onDigitInput($event, input4)" (keydown)="onKeyDown($event, input2)" />
+                <span class="otp-separator">-</span>
+                <input #input4 type="text" maxlength="1" formControlName="digit4" class="otp-input" inputmode="numeric"
+                    (input)="onDigitInput($event, input5)" (keydown)="onKeyDown($event, input3)" />
+                <input #input5 type="text" maxlength="1" formControlName="digit5" class="otp-input" inputmode="numeric"
+                    (input)="onDigitInput($event, input6)" (keydown)="onKeyDown($event, input4)" />
+                <input #input6 type="text" maxlength="1" formControlName="digit6" class="otp-input" inputmode="numeric"
+                    (keydown)="onKeyDown($event, input5)" />
+            </div>
+
+            @if (authStore.error(); as error) {
+            <div class="alert alert-error" role="alert">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clip-rule="evenodd" />
+                </svg>
+                <span>{{ error }}</span>
+            </div>
+            }
+
+            <button type="submit" class="submit-button" [class.loading]="authStore.isLoading()">
+                @if (authStore.isLoading()) {
+                <span class="spinner"></span>
+                <span>Verifying...</span>
+                } @else {
+                <span>Verify Code</span>
+                }
+            </button>
+        </form>
+
+        <div class="resend-section">
+            <p>Didn't receive a code?</p>
+            <button type="button" class="resend-button" [disabled]="!canResend()" (click)="resendOtp()">
+                @if (isResending()) {
+                Sending...
+                } @else if (resendCooldown() > 0) {
+                Resend in {{ resendCooldown() }}s
+                } @else {
+                Resend Code
+                }
+            </button>
+        </div>
+    </div>
+    <div class="background-pattern"></div>
+</div>

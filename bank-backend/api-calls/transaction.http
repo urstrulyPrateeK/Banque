@@ -1,0 +1,90 @@
+### Get All Transactions
+GET http://localhost:8080/api/v1/transactions?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Get Transaction
+GET http://localhost:8080/api/v1/transactions/1
+Authorization: Bearer <access-token>
+
+### Deposit
+POST http://localhost:8080/api/v1/transactions/deposit
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "amount": 1000.00,
+  "description": "Salary deposit"
+}
+
+### Withdraw
+POST http://localhost:8080/api/v1/transactions/withdraw
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "amount": 100.00,
+  "description": "ATM withdrawal"
+}
+
+### Search Transactions
+POST http://localhost:8080/api/v1/transactions/search?pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "startDate": "2023-01-01",
+  "endDate": "2023-12-31",
+  "minAmount": 10.00,
+  "maxAmount": 1000.00
+}
+
+### Get Recent Transactions
+GET http://localhost:8080/api/v1/transactions/recent?accountId=1&limit=5&pageable.page=0&pageable.size=5
+Authorization: Bearer <access-token>
+
+### Get Pending Transactions
+GET http://localhost:8080/api/v1/transactions/pending?accountId=1&pageable.page=0&pageable.size=10
+Authorization: Bearer <access-token>
+
+### Cancel Transaction
+POST http://localhost:8080/api/v1/transactions/1/cancel
+Authorization: Bearer <access-token>
+
+### Raise Dispute
+POST http://localhost:8080/api/v1/transactions/1/dispute
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "reason": "Unauthorized transaction"
+}
+
+### Get Transaction Receipt
+GET http://localhost:8080/api/v1/transactions/1/receipt
+Authorization: Bearer <access-token>
+
+### Export Transactions
+POST http://localhost:8080/api/v1/transactions/export
+Authorization: Bearer <access-token>
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "startDate": "2023-01-01",
+  "endDate": "2023-12-31",
+  "format": "pdf"
+}
+
+### Get Transaction Statistics
+GET http://localhost:8080/api/v1/transactions/statistics?accountId=1
+Authorization: Bearer <access-token>
+
+### Get Transaction Categories
+GET http://localhost:8080/api/v1/transactions/categories
+Authorization: Bearer <access-token>
+
+### Health Check
+GET http://localhost:8080/api/v1/transactions/health

@@ -1,0 +1,49 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed()">
+    <div class="sidebar-header">
+        <div class="logo" (click)="expandSidebar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" />
+            </svg>
+            @if (!isCollapsed()) {
+            <span class="logo-text">SecureBank</span>
+            }
+        </div>
+        <button class="collapse-btn" (click)="toggleCollapse()"
+            [attr.aria-label]="isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                @if (isCollapsed()) {
+                <path d="M9 5l7 7-7 7" />
+                } @else {
+                <path d="M15 19l-7-7 7-7" />
+                }
+            </svg>
+        </button>
+    </div>
+
+    <nav class="sidebar-nav">
+        @for (item of navItems; track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active" class="nav-item"
+            [attr.title]="isCollapsed() ? item.label : null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path [attr.d]="item.icon" />
+            </svg>
+            @if (!isCollapsed()) {
+            <span class="nav-label">{{ item.label }}</span>
+            }
+        </a>
+        }
+    </nav>
+
+    <div class="sidebar-footer">
+        @if (!isCollapsed()) {
+        <div class="user-info">
+            <div class="user-avatar">{{ authStore.userInitials() }}</div>
+            <div class="user-details">
+                <span class="user-name">{{ authStore.fullName() }}</span>
+                <span class="user-email">{{ authStore.userEmail() }}</span>
+            </div>
+        </div>
+        }
+    </div>
+</aside>

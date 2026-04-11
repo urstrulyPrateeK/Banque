@@ -1,0 +1,47 @@
+<div class="receipt-container">
+    <div class="header">
+        <a class="back-button" routerLink="/payments">Back to Payments</a>
+        <h1>Payment Receipt</h1>
+    </div>
+
+    @if (isLoading()) {
+        <div class="loading">Loading receipt...</div>
+    } @else if (error()) {
+        <div class="error-banner">{{ error() }}</div>
+    } @else if (receipt()) {
+        <div class="receipt-card">
+            <div class="row">
+                <span class="label">Reference</span>
+                <span class="value">{{ receipt()?.reference }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Status</span>
+                <span class="value">{{ receipt()?.status }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Amount</span>
+                <span class="value">
+                    {{ receipt()?.currency }} {{ receipt()?.amount | number:'1.2-2' }}
+                </span>
+            </div>
+            <div class="row">
+                <span class="label">Payee</span>
+                <span class="value">{{ receipt()?.payeeName }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Payee Account</span>
+                <span class="value">{{ receipt()?.payeeAccount }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Description</span>
+                <span class="value">{{ receipt()?.description || '—' }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Date</span>
+                <span class="value">{{ receipt()?.paymentDate | date:'medium' }}</span>
+            </div>
+        </div>
+    } @else {
+        <div class="loading">No receipt found.</div>
+    }
+</div>
