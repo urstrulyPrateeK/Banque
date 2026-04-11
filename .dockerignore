@@ -1,0 +1,9 @@
+.git
+.gitignore
+**/target
+**/node_modules
+**/.angular
+**/.vscode
+**/.idea
+*.log
+.env
