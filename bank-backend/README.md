@@ -198,8 +198,6 @@ A complete audit trail is maintained for all significant user actions, logging t
 Access the interactive Swagger UI for live API testing:
 **URL:** [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
 
-The complete API specification is also available in `openapi.json` in the `api-calls` directory.
-
 ### DTO Overview
 Key Data Transfer Objects (DTOs) used in the API:
 
