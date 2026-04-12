@@ -82,6 +82,74 @@
     gap: 1.5rem;
 }
 
+.phone-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.phone-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--bq-navy, #0a1628);
+}
+
+.phone-input-wrapper {
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--bq-mist, #e2e8f0);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: var(--bq-cloud, #f8fafc);
+}
+
+.phone-input-wrapper:focus-within {
+    border-color: var(--bq-navy, #0a1628);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(10, 22, 40, 0.08);
+}
+
+.phone-prefix {
+    padding: 0.9rem 0.75rem;
+    font-weight: 700;
+    color: var(--bq-slate, #475569);
+    border-right: 1px solid var(--bq-mist, #e2e8f0);
+}
+
+.phone-input-wrapper input {
+    border: none;
+    outline: none;
+    width: 100%;
+    padding: 0.9rem 0.75rem;
+    font-size: 0.98rem;
+    background: transparent;
+    color: var(--bq-navy, #0a1628);
+}
+
+.phone-help {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--bq-slate, #64748b);
+}
+
+.attempts-info {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--bq-slate, #64748b);
+}
+
+.attempts-info.warning {
+    color: #b45309;
+}
+
+.status-message {
+    margin: 0;
+    text-align: center;
+    font-size: 0.86rem;
+    color: var(--bq-slate, #64748b);
+}
+
 .otp-inputs {
     display: flex;
     justify-content: center;
@@ -162,6 +230,22 @@
     cursor: not-allowed;
 }
 
+.secondary-button {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--bq-mist, #cbd5e1);
+    border-radius: 0.75rem;
+    font-weight: 600;
+    color: var(--bq-navy, #0a1628);
+    background: white;
+    cursor: pointer;
+}
+
+.secondary-button:hover {
+    background: var(--bq-cloud, #f8fafc);
+}
+
 .spinner {
     width: 1.25rem;
     height: 1.25rem;
@@ -190,6 +274,12 @@
     margin: 0 0 0.5rem;
 }
 
+.resend-note {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--bq-slate, #64748b);
+}
+
 .resend-button {
     background: none;
     border: none;
@@ -206,6 +296,7 @@
 .resend-button:disabled {
     color: var(--bq-slate, #94a3b8);
     cursor: not-allowed;
+    text-decoration: none;
 }
 
 @media (max-width: 480px) {

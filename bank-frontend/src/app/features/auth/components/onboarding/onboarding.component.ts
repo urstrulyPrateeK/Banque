@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy, effect } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule, CurrencyPipe } from '@angular/common';
@@ -22,12 +22,15 @@ export class OnboardingComponent {
 
     protected readonly currentStep = signal(1);
     protected readonly isSubmitting = signal(false);
+    protected readonly avatarPreview = signal<string | null>(null);
     protected readonly totalSteps = 2;
+    private selectedAvatarFile: File | null = null;
+    private readonly maxAvatarSizeBytes = 2 * 1024 * 1024;
 
     protected readonly profileForm = this.fb.nonNullable.group({
         firstName: ['', [Validators.required, Validators.minLength(2)]],
         lastName: ['', [Validators.required, Validators.minLength(2)]],
-        email: ['', [Validators.required, Validators.email]],
+        email: [this.authStore.user()?.email || '', [Validators.required, Validators.email]],
         phone: ['', [Validators.required, Validators.pattern(/^\+?\d{10,15}$/)]],
         dateOfBirth: ['', [Validators.required]],
         address: [''],
@@ -39,8 +42,48 @@ export class OnboardingComponent {
 
     protected readonly depositPresets = [500, 1000, 5000, 10000, 25000, 50000];
 
+    constructor() {
+        effect(() => {
+            const authUser = this.authStore.user();
+            const fallbackEmail = authUser?.email || `${this.fs.userId}@banque.dev`;
+            if (fallbackEmail && !this.profileForm.controls.email.value) {
+                this.profileForm.patchValue({ email: fallbackEmail });
+            }
+        });
+    }
+
     protected setDeposit(amount: number): void {
         this.depositForm.patchValue({ initialDeposit: amount });
+    }
+
+    protected onAvatarSelected(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            this.notify.error('Please select an image file.');
+            input.value = '';
+            return;
+        }
+
+        if (file.size > this.maxAvatarSizeBytes) {
+            this.notify.error('Profile photo must be 2MB or less.');
+            input.value = '';
+            return;
+        }
+
+        this.selectedAvatarFile = file;
+        const reader = new FileReader();
+        reader.onload = () => this.avatarPreview.set(reader.result as string);
+        reader.onerror = () => this.notify.error('Could not read selected image.');
+        reader.readAsDataURL(file);
+        input.value = '';
+    }
+
+    protected removeAvatar(): void {
+        this.selectedAvatarFile = null;
+        this.avatarPreview.set(null);
     }
 
     protected nextStep(): void {
@@ -69,6 +112,7 @@ export class OnboardingComponent {
             const profile = this.profileForm.getRawValue();
             const deposit = this.depositForm.getRawValue().initialDeposit;
             const username = this.fs.userId;
+            const avatarUrl = this.selectedAvatarFile ? await this.fs.fileToBase64(this.selectedAvatarFile) : null;
 
             // 1. Save user profile
             await this.fs.setDocument(this.fs.userPath(), {
@@ -83,6 +127,7 @@ export class OnboardingComponent {
                 active: true,
                 emailVerified: true,
                 mfaEnabled: false,
+                ...(avatarUrl ? { avatarUrl } : {}),
                 seeded: true,
             });
 

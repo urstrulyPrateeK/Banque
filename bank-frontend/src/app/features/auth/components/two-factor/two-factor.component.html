@@ -8,9 +8,61 @@
                 </svg>
             </div>
             <h1>Two-Factor Authentication</h1>
-            <p class="subtitle">Enter the 6-digit code sent to your device</p>
+            @if (!phoneConfirmed()) {
+            <p class="subtitle">Confirm your registered phone number to continue login</p>
+            } @else {
+            <p class="subtitle">Enter the 6-digit OTP sent to {{ maskedPhone() }}</p>
+            }
         </div>
 
+        @if (isLoadingContext()) {
+        <p class="status-message">Preparing verification details...</p>
+        } @else if (blockedMessage(); as blocked) {
+        <div class="alert alert-error" role="alert">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clip-rule="evenodd" />
+            </svg>
+            <span>{{ blocked }}</span>
+        </div>
+        <button type="button" class="secondary-button" (click)="backToLogin()">Back to Login</button>
+        } @else if (!phoneConfirmed()) {
+        <form [formGroup]="phoneForm" (ngSubmit)="confirmPhone()" class="otp-form">
+            <div class="phone-group">
+                <label for="mfa-phone">Registered Phone Number</label>
+                <div class="phone-input-wrapper">
+                    <span class="phone-prefix">+91</span>
+                    <input id="mfa-phone" type="tel" maxlength="10" inputmode="numeric" formControlName="phone"
+                        placeholder="Enter your 10-digit phone" autocomplete="tel-national" />
+                </div>
+                <p class="phone-help">Use the same number ending with {{ maskedPhone().slice(-4) }}.</p>
+                <p class="attempts-info" [class.warning]="remainingPhoneAttempts() === 1">
+                    Wrong-number attempts remaining: {{ remainingPhoneAttempts() }} of {{ maxPhoneAttempts }}
+                </p>
+            </div>
+
+            @if (phoneError(); as phoneError) {
+            <div class="alert alert-error" role="alert">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clip-rule="evenodd" />
+                </svg>
+                <span>{{ phoneError }}</span>
+            </div>
+            }
+
+            <button type="submit" class="submit-button" [disabled]="isSendingOtp()">
+                @if (isSendingOtp()) {
+                <span class="spinner"></span>
+                <span>Sending OTP...</span>
+                } @else {
+                <span>Confirm and Send OTP</span>
+                }
+            </button>
+        </form>
+        } @else {
         <form [formGroup]="otpForm" (ngSubmit)="onSubmit()" class="otp-form">
             <div class="otp-inputs" (paste)="onPaste($event)">
                 <input #input1 type="text" maxlength="1" formControlName="digit1" class="otp-input" inputmode="numeric"
@@ -27,6 +79,25 @@
                 <input #input6 type="text" maxlength="1" formControlName="digit6" class="otp-input" inputmode="numeric"
                     (keydown)="onKeyDown($event, input5)" />
             </div>
+
+            <p class="status-message">
+                @if (otpExpiresIn() > 0) {
+                Code expires in {{ otpExpiresIn() }}s
+                } @else {
+                Code expired. You can request one resend.
+                }
+            </p>
+
+            @if (phoneError(); as phoneError) {
+            <div class="alert alert-error" role="alert">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clip-rule="evenodd" />
+                </svg>
+                <span>{{ phoneError }}</span>
+            </div>
+            }
 
             @if (authStore.error(); as error) {
             <div class="alert alert-error" role="alert">
@@ -48,19 +119,25 @@
                 }
             </button>
         </form>
+        }
 
+        @if (phoneConfirmed() && !blockedMessage()) {
         <div class="resend-section">
             <p>Didn't receive a code?</p>
             <button type="button" class="resend-button" [disabled]="!canResend()" (click)="resendOtp()">
                 @if (isResending()) {
                 Sending...
-                } @else if (resendCooldown() > 0) {
-                Resend in {{ resendCooldown() }}s
+                } @else if (resendUsed()) {
+                Resend limit reached
+                } @else if (otpExpiresIn() > 0) {
+                Wait for expiry
                 } @else {
                 Resend Code
                 }
             </button>
+            <p class="resend-note">Only one resend is allowed and only after the previous OTP expires.</p>
         </div>
+        }
     </div>
     <div class="background-pattern"></div>
 </div>

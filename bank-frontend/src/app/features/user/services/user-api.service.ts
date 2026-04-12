@@ -22,19 +22,21 @@ export class UserApiService {
 
     getCurrentUser(): Observable<UserResponse> {
         return from(this.fs.getDocument<UserResponse>(this.fs.userPath())).pipe(
-            map((user) => user || this.defaultUser())
+            map((user) => this.mergeWithDefaultUser(user))
         );
     }
 
     updateProfile(data: UpdateProfileRequest): Observable<UserResponse> {
         return from(this.fs.setDocument(this.fs.userPath(), data as unknown as Record<string, unknown>)).pipe(
-            map(() => ({ ...this.defaultUser(), ...data } as unknown as UserResponse))
+            switchMap(() => from(this.fs.getDocument<UserResponse>(this.fs.userPath()))),
+            map((user) => this.mergeWithDefaultUser(user, data as unknown as Partial<UserResponse>))
         );
     }
 
     partialUpdateProfile(data: PartialUpdateRequest): Observable<UserResponse> {
         return from(this.fs.setDocument(this.fs.userPath(), data as unknown as Record<string, unknown>)).pipe(
-            map(() => ({ ...this.defaultUser(), ...data } as unknown as UserResponse))
+            switchMap(() => from(this.fs.getDocument<UserResponse>(this.fs.userPath()))),
+            map((user) => this.mergeWithDefaultUser(user, data as unknown as Partial<UserResponse>))
         );
     }
 
@@ -142,17 +144,27 @@ export class UserApiService {
 
     checkHealth(): Observable<string> { return of('OK'); }
 
+    private mergeWithDefaultUser(
+        user: UserResponse | null,
+        overrides: Partial<UserResponse> = {}
+    ): UserResponse {
+        return { ...this.defaultUser(), ...(user || {}), ...overrides } as UserResponse;
+    }
+
     private defaultUser(): UserResponse {
+        const username = this.fs.userId === 'guest' ? 'user' : this.fs.userId;
+        const firstName = username.charAt(0).toUpperCase() + username.slice(1);
         return {
             id: 1,
-            username: 'prateek',
-            email: 'prateek@banque.dev',
-            firstName: 'Prateek',
-            lastName: 'Singh',
+            username,
+            email: `${username}@banque.dev`,
+            firstName,
+            lastName: '',
             role: 'USER',
             active: true,
             emailVerified: true,
             mfaEnabled: false,
+            createdAt: new Date().toISOString(),
         } as UserResponse;
     }
 

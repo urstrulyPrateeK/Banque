@@ -458,7 +458,7 @@ INSERT INTO recurring_payments (
     description, is_active, created_at
 ) VALUES
       (1, 2, 'UTILITY',  'ELECTRICITY', 142.30, 'USD', 'MONTHLY', '2026-01-25', '2026-12-25', '2026-02-25', 'Commonwealth Edison',  'CE-98765-SPR', 'Auto-pay electric bill on the 25th', true,  '2026-01-24 10:00:00'),
-      (2, 3, 'RENT',     'HOUSING',    1200.00, 'GBP', 'MONTHLY', '2026-01-01', NULL,         '2026-02-01', 'Landlord Ltd',         'EXT00000202',  'Monthly flat rent - Shoreditch',      true,  '2025-12-28 09:00:00'),
+      (2, 3, 'RENT',     'HOUSING',    1200.00, 'GBP', 'MONTHLY', '2026-01-01', NULL,         '2026-02-01', 'Landlord Ltd',         'EXT00000202',  'Monthly flat rent - Shoreditch',      true,  '2026-12-28 09:00:00'),
       (3, 5, 'SHOPPING', 'GROCERIES',   500.00, 'CNY', 'WEEKLY',  '2026-01-06', '2026-03-31', '2026-02-03', 'Carrefour Shanghai',   'CF-SH-001',    'Weekly grocery allowance',            false, '2026-01-05 07:00:00');
 
 -- =============================================================================

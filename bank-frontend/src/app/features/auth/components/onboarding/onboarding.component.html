@@ -30,6 +30,33 @@
                 </div>
 
                 <form [formGroup]="profileForm" (ngSubmit)="nextStep()" class="onboarding-form">
+                    <div class="profile-photo-field">
+                        <label>Profile Photo <span class="optional">(optional)</span></label>
+                        <div class="photo-upload-shell">
+                            <div class="photo-preview-wrap">
+                                @if (avatarPreview()) {
+                                    <img [src]="avatarPreview()" alt="Profile photo preview" class="photo-preview-img">
+                                } @else {
+                                    <div class="photo-placeholder">{{ authStore.userInitials() }}</div>
+                                }
+                            </div>
+                            <div class="photo-actions">
+                                <label for="onboarding-photo-upload" class="photo-upload-btn">Upload Photo</label>
+                                @if (avatarPreview()) {
+                                    <button type="button" class="photo-remove-btn" (click)="removeAvatar()">Remove</button>
+                                }
+                                <p class="photo-hint">PNG or JPG, up to 2MB</p>
+                            </div>
+                            <input
+                                id="onboarding-photo-upload"
+                                type="file"
+                                accept="image/*"
+                                class="hidden-input"
+                                (change)="onAvatarSelected($event)"
+                            >
+                        </div>
+                    </div>
+
                     <div class="form-row-2col">
                         <div class="form-field">
                             <label for="firstName">First Name</label>
@@ -52,11 +79,12 @@
                     </div>
 
                     <div class="form-field">
-                        <label for="email">Email Address</label>
-                        <div class="input-wrap" [class.has-error]="getFieldError(profileForm, 'email')">
+                        <label for="email">Email Address <span class="optional">(from login)</span></label>
+                        <div class="input-wrap locked" [class.has-error]="getFieldError(profileForm, 'email')">
                             <svg class="field-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" /></svg>
-                            <input id="email" type="email" formControlName="email" placeholder="you@example.com">
+                            <input id="email" type="email" formControlName="email" placeholder="you@example.com" [readonly]="true">
                         </div>
+                        <span class="field-note">This is auto-filled from your signed-in account.</span>
                         @if (getFieldError(profileForm, 'email'); as error) {
                             <span class="field-error">{{ error }}</span>
                         }

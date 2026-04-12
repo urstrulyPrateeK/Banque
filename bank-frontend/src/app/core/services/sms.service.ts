@@ -8,10 +8,14 @@ import { environment } from '@env/environment';
 @Injectable({ providedIn: 'root' })
 export class SmsService {
     private readonly apiUrl = 'https://www.fast2sms.com/dev/bulkV2';
-    private readonly apiKey = environment.fast2smsApiKey;
+    private readonly apiKey = (environment.fast2smsApiKey || '').trim();
+    private readonly knownPlaceholders = new Set([
+        '__FAST2SMS_API_KEY__',
+        'your_fast2sms_api_key',
+    ]);
 
     get isConfigured(): boolean {
-        return this.apiKey.length > 0;
+        return this.apiKey.length > 0 && !this.knownPlaceholders.has(this.apiKey);
     }
 
     async sendOtp(phoneNumber: string, otp: string): Promise<boolean> {
@@ -25,15 +29,28 @@ export class SmsService {
         }
 
         try {
-            const url = `${this.apiUrl}?authorization=${this.apiKey}&variables_values=${otp}&route=otp&numbers=${cleanNumber}`;
-            const response = await fetch(url, { method: 'GET' });
+            const body = new URLSearchParams({
+                route: 'otp',
+                variables_values: otp,
+                numbers: cleanNumber,
+                flash: '0',
+            });
+
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    authorization: this.apiKey,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: body.toString(),
+            });
             const data = await response.json();
 
-            if (data.return === true) {
+            if (response.ok && data.return === true) {
                 console.log('✅ OTP sent successfully via Fast2SMS');
                 return true;
             } else {
-                console.error('❌ Fast2SMS error:', data.message);
+                console.error('❌ Fast2SMS error:', data?.message || data);
                 return false;
             }
         } catch (error) {

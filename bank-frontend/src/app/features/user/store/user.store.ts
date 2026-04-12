@@ -97,7 +97,11 @@ export const UserStore = signalStore(
                         userApi.updateProfile(data).pipe(
                             tapResponse({
                                 next: (profile) => {
-                                    patchState(store, { profile, isLoading: false });
+                                    patchState(store, {
+                                        profile,
+                                        avatarUrl: profile.avatarUrl || null,
+                                        isLoading: false
+                                    });
                                     notificationService.success('Profile updated successfully');
                                 },
                                 error: (error: any) => {
@@ -118,7 +122,11 @@ export const UserStore = signalStore(
                         userApi.partialUpdateProfile(data).pipe(
                             tapResponse({
                                 next: (profile) => {
-                                    patchState(store, { profile, isLoading: false });
+                                    patchState(store, {
+                                        profile,
+                                        avatarUrl: profile.avatarUrl || null,
+                                        isLoading: false
+                                    });
                                     notificationService.success('Profile updated');
                                 },
                                 error: (error: any) => {
@@ -132,24 +140,23 @@ export const UserStore = signalStore(
 
             uploadAvatar: rxMethod<File>(
                 pipe(
-                    tap(() => patchState(store, { isLoading: true })),
+                    tap(() => patchState(store, { isLoading: true, error: null })),
                     switchMap((file) =>
                         userApi.uploadAvatar(file).pipe(
+                            switchMap(() => userApi.getCurrentUser()),
                             tapResponse({
-                                next: () => {
-                                    patchState(store, { isLoading: false });
-                                    // Manually triggering loadProfile would be ideal, but we can't easily call other methods from here directly inside rxMethod definition without context or structural change.
-                                    // A better pattern is to just invalidate or manually call the API and patch.
-                                    // But since we are inside the store factory, we *can* call the method if we structure it right, or just re-fetch.
-
-                                    // Simplest fix: Re-fetch profile and update state
-                                    userApi.getCurrentUser().subscribe({
-                                        next: (profile) => patchState(store, { profile }),
-                                        error: (err) => console.error('Failed to reload profile after upload', err)
+                                next: (profile) => {
+                                    patchState(store, {
+                                        profile,
+                                        avatarUrl: profile.avatarUrl || null,
+                                        isLoading: false
                                     });
-                                    notificationService.success('Avatar uploaded');
+                                    notificationService.success('Profile photo updated');
                                 },
-                                error: (err: any) => patchState(store, { error: err.message, isLoading: false }),
+                                error: (err: any) => {
+                                    patchState(store, { error: err.message, isLoading: false });
+                                    notificationService.error('Failed to upload profile photo');
+                                },
                             })
                         )
                     )

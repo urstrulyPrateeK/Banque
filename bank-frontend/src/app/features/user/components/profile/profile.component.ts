@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UserStore } from '../../store/user.store';
@@ -169,7 +169,7 @@ import { SmsService } from '@core/services/sms.service';
                 @if (otpVerified()) {
                    <span class="badge success">Verified</span>
                 } @else {
-                   <button class="action-link" (click)="showOtpSetup.set(true)">Enable</button>
+                         <button class="action-link otp-enable-pill" (click)="showOtpSetup.set(true)">Enable</button>
                 }
              </div>
 
@@ -469,6 +469,22 @@ import { SmsService } from '@core/services/sms.service';
         cursor: pointer;
         padding: 0;
     }
+
+    .otp-enable-pill {
+        padding: 0.4rem 1rem;
+        border: 1px solid rgba(13, 148, 136, 0.32);
+        border-radius: 9999px;
+        background: linear-gradient(180deg, rgba(13, 148, 136, 0.08), rgba(13, 148, 136, 0.02));
+        color: var(--bq-teal, #0d9488);
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .otp-enable-pill:hover {
+        background: rgba(13, 148, 136, 0.12);
+        border-color: rgba(13, 148, 136, 0.5);
+        transform: translateY(-1px);
+    }
     
     @media (max-width: 768px) {
         .profile-content { grid-template-columns: 1fr; }
@@ -561,6 +577,16 @@ export class ProfileComponent implements OnInit {
     private generatedOtp = '';
     private otpDigits: string[] = ['', '', '', '', '', ''];
 
+    constructor() {
+        effect(() => {
+            const avatarUrl = this.userStore.profile()?.avatarUrl;
+            if (avatarUrl) {
+                // Use persisted avatar from store after upload succeeds.
+                this.avatarPreview.set(null);
+            }
+        });
+    }
+
     protected readonly profileForm = this.fb.nonNullable.group({
         firstName: ['', [Validators.required]],
         lastName: ['', [Validators.required]],
@@ -628,6 +654,7 @@ export class ProfileComponent implements OnInit {
             reader.readAsDataURL(file);
             // Upload to Firestore
             this.userStore.uploadAvatar(file);
+            input.value = '';
         }
     }
 
@@ -654,15 +681,21 @@ export class ProfileComponent implements OnInit {
         }).then(async () => {
             // Try sending via SMS gateway
             const sent = await this.sms.sendOtp(this.phoneNumber, this.generatedOtp);
+            if (this.sms.isConfigured && !sent) {
+                this.otpSending.set(false);
+                this.otpSent.set(false);
+                this.otpError.set('Unable to send OTP right now. Please try again.');
+                this.notify.error('Failed to send OTP via SMS. Please verify your SMS configuration and try again.');
+                return;
+            }
+
             this.otpSending.set(false);
             this.otpSent.set(true);
             this.startResendCooldown();
+            this.notify.success(`OTP sent to +91 ${this.phoneNumber}`);
 
-            if (this.sms.isConfigured && sent) {
-                this.notify.success(`OTP sent to +91 ${this.phoneNumber}`);
-            } else {
+            if (!this.sms.isConfigured) {
                 // Demo mode — show OTP as notification
-                this.notify.success(`OTP sent to +91 ${this.phoneNumber}`);
                 setTimeout(() => {
                     this.notify.info(`Demo OTP: ${this.generatedOtp}`);
                 }, 800);

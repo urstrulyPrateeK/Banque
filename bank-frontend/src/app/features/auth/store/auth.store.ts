@@ -70,6 +70,10 @@ export const AuthStore = signalStore(
             notificationService = inject(NotificationService),
             firestoreService = inject(FirestoreService)
         ) => {
+            function createSessionId(): string {
+                return `mfa_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+            }
+
             function buildDemoUser(username: string): User {
                 const capitalized = username.charAt(0).toUpperCase() + username.slice(1);
                 return {
@@ -86,6 +90,37 @@ export const AuthStore = signalStore(
                 };
             }
 
+            async function startMfaVerification(username: string, user: User): Promise<void> {
+                const sessionId = createSessionId();
+
+                // Do not keep app-level auth token before OTP completes.
+                storageService.removeToken();
+                storageService.removeRefreshToken();
+
+                await firestoreService.setDocument(`${firestoreService.userPath()}/otp/login`, {
+                    sessionId,
+                    phone: user.phoneNumber || '',
+                    code: null,
+                    expiresAt: null,
+                    resendCount: 0,
+                    verified: false,
+                    numberAttempts: 0,
+                    createdAt: new Date().toISOString(),
+                });
+
+                patchState(store, {
+                    user,
+                    isAuthenticated: false,
+                    isLoading: false,
+                    mfaRequired: true,
+                    sessionId,
+                    error: null,
+                });
+
+                notificationService.info('Two-factor authentication is enabled. Verify your registered phone number to continue.');
+                router.navigate(['/auth/verify-otp']);
+            }
+
             async function handleLoginSuccess(username: string): Promise<void> {
                 // Set per-user Firestore path (whether real or demo)
                 firestoreService.setUserId(username);
@@ -94,6 +129,16 @@ export const AuthStore = signalStore(
                 try {
                     const isSeeded = await firestoreService.isSeeded();
                     if (!isSeeded) {
+                        if (!storageService.getToken()) {
+                            storageService.setToken(DEMO_TOKEN);
+                        }
+                        patchState(store, {
+                            isAuthenticated: true,
+                            isLoading: false,
+                            mfaRequired: false,
+                            sessionId: null,
+                            error: null,
+                        });
                         // New user — redirect to onboarding
                         const name = store.user()?.firstName || username;
                         notificationService.success(`Welcome to Banque, ${name}! Let's set up your account.`);
@@ -108,30 +153,65 @@ export const AuthStore = signalStore(
                 try {
                     const profile = await firestoreService.getDocument<any>(firestoreService.userPath());
                     if (profile) {
+                        const mergedUser = {
+                            ...(store.user() ?? buildDemoUser(username)),
+                            firstName: profile['firstName'] || store.user()?.firstName,
+                            lastName: profile['lastName'] || store.user()?.lastName || '',
+                            email: profile['email'] || store.user()?.email,
+                            phoneNumber: profile['phoneNumber'] || store.user()?.phoneNumber,
+                            mfaEnabled: Boolean(profile['mfaEnabled']),
+                            active: profile['active'] !== false,
+                        } as User;
+
                         patchState(store, {
-                            user: {
-                                ...store.user(),
-                                firstName: profile['firstName'] || store.user()?.firstName,
-                                lastName: profile['lastName'] || store.user()?.lastName || '',
-                                email: profile['email'] || store.user()?.email,
-                            } as User,
+                            user: mergedUser,
                         });
+
+                        if (profile['active'] === false || profile['mfaLoginBlocked'] === true) {
+                            storageService.removeToken();
+                            storageService.removeRefreshToken();
+                            patchState(store, {
+                                isAuthenticated: false,
+                                isLoading: false,
+                                mfaRequired: false,
+                                sessionId: null,
+                                error: 'Your account is blocked due to failed verification attempts.',
+                            });
+                            notificationService.error('Your account is blocked. Please contact support.');
+                            return;
+                        }
+
+                        if (Boolean(profile['mfaEnabled']) && Boolean(profile['otpVerified']) && Boolean(profile['phoneNumber'])) {
+                            await startMfaVerification(username, mergedUser);
+                            return;
+                        }
                     }
                 } catch { /* ignore */ }
+
+                if (!storageService.getToken()) {
+                    storageService.setToken(DEMO_TOKEN);
+                }
+
+                patchState(store, {
+                    isAuthenticated: true,
+                    isLoading: false,
+                    mfaRequired: false,
+                    sessionId: null,
+                    error: null,
+                });
 
                 notificationService.success(`Welcome back, ${store.user()?.firstName || username}!`);
                 router.navigate(['/dashboard']);
             }
 
             async function activateDemoSession(username: string): Promise<void> {
-                storageService.setToken(DEMO_TOKEN);
                 storageService.setItem('banque_username', username);
 
                 // Initialize the basic demo user state first
                 patchState(store, {
                     user: buildDemoUser(username),
-                    isAuthenticated: true,
-                    isLoading: false,
+                    isAuthenticated: false,
+                    isLoading: true,
                     mfaRequired: false,
                     sessionId: null,
                     error: null,
@@ -149,13 +229,28 @@ export const AuthStore = signalStore(
                             authService.login(credentials).pipe(
                                 tapResponse({
                                     next: async (response) => {
+                                        if (response?.mfaRequired && response?.sessionId) {
+                                            firestoreService.setUserId(credentials.username);
+                                            storageService.setItem('banque_username', credentials.username);
+                                            patchState(store, {
+                                                user: response.user ?? buildDemoUser(credentials.username),
+                                                isAuthenticated: false,
+                                                isLoading: false,
+                                                mfaRequired: true,
+                                                sessionId: response.sessionId,
+                                                error: null,
+                                            });
+                                            router.navigate(['/auth/verify-otp']);
+                                            return;
+                                        }
+
                                         if (response?.accessToken) {
                                             storageService.setToken(response.accessToken);
                                             if (response.refreshToken) storageService.setRefreshToken(response.refreshToken);
                                             
                                             patchState(store, {
                                                 user: response.user ?? buildDemoUser(credentials.username),
-                                                isAuthenticated: true,
+                                                isAuthenticated: false,
                                                 isLoading: false,
                                             });
 
@@ -201,13 +296,30 @@ export const AuthStore = signalStore(
                             authService.verifyOtp(data).pipe(
                                 tapResponse({
                                     next: (response) => {
-                                        if (response.accessToken) {
-                                            storageService.setToken(response.accessToken);
-                                            patchState(store, { user: response.user ?? buildDemoUser('user'), isAuthenticated: true, isLoading: false, mfaRequired: false });
+                                        if (response?.accessToken || response?.user) {
+                                            storageService.setToken(response?.accessToken || DEMO_TOKEN);
+                                            if (response?.refreshToken) {
+                                                storageService.setRefreshToken(response.refreshToken);
+                                            }
+                                            patchState(store, {
+                                                user: response.user ?? store.user() ?? buildDemoUser(firestoreService.userId),
+                                                isAuthenticated: true,
+                                                isLoading: false,
+                                                mfaRequired: false,
+                                                sessionId: null,
+                                                error: null,
+                                            });
+                                            notificationService.success('Two-factor verification successful.');
                                             router.navigate(['/dashboard']);
+                                            return;
                                         }
+
+                                        patchState(store, { error: 'OTP verification failed', isLoading: false });
                                     },
-                                    error: (error: Error) => patchState(store, { error: error.message, isLoading: false }),
+                                    error: (error: Error) => {
+                                        patchState(store, { error: error.message, isLoading: false });
+                                        notificationService.error(error.message || 'OTP verification failed');
+                                    },
                                 })
                             )
                         )
