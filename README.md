@@ -1,5 +1,5 @@
 # Banque - Smart Banking Infrastructure
-> Built by Prateek Singh | [GitHub](https://github.com/urstrulyPrateeK/Banque) | [Live Demo](https://banque.onrender.com)
+> Built by Prateek Singh | [GitHub](https://github.com/urstrulyPrateeK/Banque) | [Live Demo](https://banque-web.a.run.app)
 
 ## Why I Built This
 I wanted a banking project that felt closer to an internal platform than a tutorial app, so I focused on the operational edges that usually get skipped: transfer safety, document handling, metrics, and searchability. I also wanted one deployment path that could show the full Angular and Spring Boot stack through a single live URL, while still keeping Google Cloud integration visible in the codebase.
@@ -16,7 +16,7 @@ I wanted a banking project that felt closer to an internal platform than a tutor
 | Cache | Caffeine | 3.2.3 | In-memory caching keeps balance reads fast without adding Redis complexity for a single-service deployment. |
 | Cloud Storage | Google Cloud Storage SDK | 2.63.0 | Signed document access and bucket-backed file storage show real GCP integration. |
 | Observability | Micrometer + Spring Actuator | 4.0.2 | I wanted metrics and health endpoints ready for scraping and runtime checks. |
-| Containers | Docker + Docker Compose | 26.x + Compose v2 | Containers make local setup predictable and support Cloud Run or Render packaging. |
+| Containers | Docker + Docker Compose | 26.x + Compose v2 | Containers make local setup predictable and support Cloud Run packaging. |
 
 ## Architecture Diagram
 ```text
@@ -50,7 +50,7 @@ I wanted a banking project that felt closer to an internal platform than a tutor
 - WCAG AA accessible UI - keyboard navigation works across the main flows because interactive controls use native buttons, visible focus states, and readable contrast.
 
 ## Google Cloud Architecture
-The GCP target architecture is a single Cloud Run service serving the Angular bundle from Spring Boot, Cloud SQL for PostgreSQL, and a dedicated GCS bucket for document storage. In this repo I kept the cloud pieces visible through `CloudStorageService`, signed document access, `cloudbuild.yaml`, and the GitHub Actions deployment workflow, while the live preview path is a single Render service that serves the Angular app from Spring Boot.
+The GCP architecture uses a single Cloud Run service serving the Angular bundle from Spring Boot, Cloud SQL for PostgreSQL, and a dedicated GCS bucket for document storage. In this repo I wired the cloud path through `CloudStorageService`, signed document access, `cloudbuild.yaml`, and the GitHub Actions deployment workflow.
 
 ## Getting Started
 1. Clone the repository.
@@ -65,8 +65,8 @@ The GCP target architecture is a single Cloud Run service serving the Angular bu
    `cd bank-frontend && npm ci && npm start`
 6. Run the full stack with Docker if you want containerized local development.
    `docker compose up --build`
-7. Deploy a single live URL on Render.
-   Connect the repo in Render and use the root `Dockerfile` or `render.yaml`; Spring Boot will serve the compiled Angular app and API from one service.
+7. Deploy a single live URL on Cloud Run.
+   Use `cloudbuild.yaml` (or GitHub Actions) to build and deploy the `banque-web` service to Cloud Run.
 
 ## API Documentation
 | Method | Path | Auth | Description |
@@ -85,7 +85,7 @@ The GCP target architecture is a single Cloud Run service serving the Angular bu
 - Why SERIALIZABLE isolation over REPEATABLE READ?
   Money movement is the one flow where I would rather trade throughput for correctness, especially when concurrent writes can cause double-spend behavior.
 - Why Caffeine over Redis for caching?
-  This project ships as a single service on Render today, so Caffeine gives me balance-read acceleration without another runtime dependency to provision.
+   This project ships as a single Cloud Run service today, so Caffeine gives me balance-read acceleration without another runtime dependency to provision.
 - Why Angular Signals over NgRx?
   The dashboard and UI filters are local, reactive, and latency-sensitive; Signals kept that state model smaller and easier to read than a larger action/reducer setup.
 - Why GCS over AWS S3?
@@ -97,6 +97,6 @@ The GCP target architecture is a single Cloud Run service serving the Angular bu
 - Transfer consistency is easy to describe and harder to prove; the concurrency tests were the part that gave me the most confidence in the transactional choices.
 
 ## Roadmap
-- [ ] Deploy to Cloud Run (CI/CD via GitHub Actions -> GCP)
+- [x] Deploy to Cloud Run (CI/CD via GitHub Actions -> GCP)
 - [ ] Add Fraud Detection microservice (ML-based anomaly detection)
 - [ ] Kafka event streaming for audit log
