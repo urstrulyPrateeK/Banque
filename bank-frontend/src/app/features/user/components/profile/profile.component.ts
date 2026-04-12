@@ -184,7 +184,7 @@ import { SmsService } from '@core/services/sms.service';
                       <span class="country-code">+91</span>
                       <input type="tel" [(ngModel)]="phoneNumber" placeholder="Enter 10-digit phone number" maxlength="10" class="phone-input" />
                    </div>
-                   <button class="otp-send-btn" (click)="sendOtp()" [disabled]="otpSending() || phoneNumber.length < 10">
+                         <button type="button" class="otp-send-btn" (click)="sendOtp()" [disabled]="otpSending() || !isPhoneReadyForOtp()">
                       @if (otpSending()) {
                         <span class="mini-spinner"></span> Sending...
                       } @else {
@@ -192,6 +192,9 @@ import { SmsService } from '@core/services/sms.service';
                       }
                    </button>
                 </div>
+                     @if (otpError()) {
+                     <p class="otp-error otp-error-inline">{{ otpError() }}</p>
+                     }
                 } @else {
                 <div class="otp-verify-section">
                    <p class="otp-sent-msg">A 6-digit OTP has been sent to +91 {{ phoneNumber }}</p>
@@ -205,14 +208,14 @@ import { SmsService } from '@core/services/sms.service';
                       }
                    </div>
                    <div class="otp-actions">
-                      <button class="otp-verify-btn" (click)="verifyOtp()" [disabled]="otpVerifying() || enteredOtp().length < 6">
+                             <button type="button" class="otp-verify-btn" (click)="verifyOtp()" [disabled]="otpVerifying() || enteredOtp().length < 6">
                          @if (otpVerifying()) {
                            <span class="mini-spinner"></span> Verifying...
                          } @else {
                            Verify OTP
                          }
                       </button>
-                      <button class="otp-resend-link" (click)="sendOtp()" [disabled]="resendCooldown() > 0">
+                             <button type="button" class="otp-resend-link" (click)="sendOtp()" [disabled]="resendCooldown() > 0 || otpSending()">
                          {{ resendCooldown() > 0 ? 'Resend in ' + resendCooldown() + 's' : 'Resend OTP' }}
                       </button>
                    </div>
@@ -545,6 +548,7 @@ import { SmsService } from '@core/services/sms.service';
     }
     .otp-resend-link:disabled { color: var(--bq-slate, #94a3b8); cursor: not-allowed; }
     .otp-error { color: var(--bq-danger, #dc2626); font-size: 0.9rem; margin-top: 0.5rem; text-align: center; }
+    .otp-error-inline { text-align: left; margin-top: 0.75rem; }
     .mini-spinner {
         display: inline-block; width: 16px; height: 16px;
         border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
@@ -604,7 +608,7 @@ export class ProfileComponent implements OnInit {
         // Check if OTP was already verified
         this.fs.getDocument<any>(this.fs.userPath()).then((user) => {
             if (user?.otpVerified) this.otpVerified.set(true);
-            if (user?.phoneNumber) this.phoneNumber = user.phoneNumber.replace('+91 ', '');
+            if (user?.phoneNumber) this.phoneNumber = this.normalizePhone(user.phoneNumber);
         });
     }
 
@@ -664,35 +668,43 @@ export class ProfileComponent implements OnInit {
 
     // ─── OTP Methods ───
 
-    protected sendOtp(): void {
-        if (this.phoneNumber.length < 10) return;
+    protected isPhoneReadyForOtp(): boolean {
+        return this.normalizePhone(this.phoneNumber).length === 10;
+    }
+
+    protected async sendOtp(): Promise<void> {
+        const cleanPhone = this.normalizePhone(this.phoneNumber);
+        if (cleanPhone.length !== 10) {
+            this.otpError.set('Please enter a valid 10-digit phone number.');
+            this.notify.error('Please enter a valid 10-digit phone number.');
+            return;
+        }
+
+        this.phoneNumber = cleanPhone;
         this.otpSending.set(true);
         this.otpError.set(null);
 
         // Generate a 6-digit OTP
         this.generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Store OTP in Firestore for verification
-        this.fs.setDocument(`${this.fs.userPath()}/otp/current`, {
-            code: this.generatedOtp,
-            phone: `+91${this.phoneNumber}`,
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-            verified: false,
-        }).then(async () => {
+        try {
+            // Store OTP in Firestore for verification
+            await this.fs.setDocument(`${this.fs.userPath()}/otp/current`, {
+                code: this.generatedOtp,
+                phone: `+91 ${cleanPhone}`,
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+                verified: false,
+            });
+
             // Try sending via SMS gateway
-            const sent = await this.sms.sendOtp(this.phoneNumber, this.generatedOtp);
+            const sent = await this.sms.sendOtp(cleanPhone, this.generatedOtp);
             if (this.sms.isConfigured && !sent) {
-                this.otpSending.set(false);
-                this.otpSent.set(false);
-                this.otpError.set('Unable to send OTP right now. Please try again.');
-                this.notify.error('Failed to send OTP via SMS. Please verify your SMS configuration and try again.');
-                return;
+                throw new Error('Failed to send OTP via SMS. Please verify your SMS configuration and try again.');
             }
 
-            this.otpSending.set(false);
             this.otpSent.set(true);
             this.startResendCooldown();
-            this.notify.success(`OTP sent to +91 ${this.phoneNumber}`);
+            this.notify.success(`OTP sent to +91 ${cleanPhone}`);
 
             if (!this.sms.isConfigured) {
                 // Demo mode — show OTP as notification
@@ -700,10 +712,14 @@ export class ProfileComponent implements OnInit {
                     this.notify.info(`Demo OTP: ${this.generatedOtp}`);
                 }, 800);
             }
-        }).catch(() => {
+        } catch (error) {
+            this.otpSent.set(false);
+            const message = error instanceof Error ? error.message : 'Failed to send OTP. Please try again.';
+            this.otpError.set(message);
+            this.notify.error(message);
+        } finally {
             this.otpSending.set(false);
-            this.otpError.set('Failed to send OTP. Please try again.');
-        });
+        }
     }
 
     protected verifyOtp(): void {
@@ -808,5 +824,10 @@ export class ProfileComponent implements OnInit {
                 return v - 1;
             });
         }, 1000);
+    }
+
+    private normalizePhone(phone: string): string {
+        const digits = String(phone || '').replace(/\D/g, '');
+        return digits.length > 10 ? digits.slice(-10) : digits;
     }
 }
