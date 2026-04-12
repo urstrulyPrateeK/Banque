@@ -26,20 +26,35 @@ import {
 // Firebase Storage removed — avatar stored as base64 in Firestore
 import { firebaseConfig } from './firebase.config';
 
-const DEMO_USER_ID = 'demo_user';
+const STORAGE_USER_KEY = 'banque_user_id';
 
 @Injectable({ providedIn: 'root' })
 export class FirestoreService {
     private readonly app: FirebaseApp;
     private readonly db: Firestore;
+    private _userId: string | null = null;
 
     constructor() {
         this.app = initializeApp(firebaseConfig);
         this.db = getFirestore(this.app);
+        // Restore userId from localStorage on init
+        this._userId = localStorage.getItem(STORAGE_USER_KEY);
     }
 
     get userId(): string {
-        return DEMO_USER_ID;
+        return this._userId || 'guest';
+    }
+
+    /** Set the active user ID (called on login) */
+    setUserId(id: string): void {
+        this._userId = id;
+        localStorage.setItem(STORAGE_USER_KEY, id);
+    }
+
+    /** Clear the active user ID (called on logout) */
+    clearUserId(): void {
+        this._userId = null;
+        localStorage.removeItem(STORAGE_USER_KEY);
     }
 
     // ─── Document Operations ───

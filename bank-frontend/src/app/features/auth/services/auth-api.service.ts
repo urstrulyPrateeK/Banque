@@ -53,10 +53,21 @@ export class AuthApiService {
 
     getCurrentUser(): Observable<any> {
         return from(this.fs.getDocument<any>(this.fs.userPath())).pipe(
-            map((user) => user || {
-                id: 1, username: 'prateek', email: 'prateek@banque.dev',
-                firstName: 'Prateek', lastName: 'Singh', role: 'USER',
-                active: true, emailVerified: true, mfaEnabled: false,
+            map((user) => {
+                if (user) return user;
+                // Return a minimal user from the current userId — no hardcoded fallback
+                const uid = this.fs.userId;
+                return {
+                    id: 1,
+                    username: uid,
+                    email: `${uid}@banque.dev`,
+                    firstName: uid.charAt(0).toUpperCase() + uid.slice(1),
+                    lastName: '',
+                    role: 'USER',
+                    active: true,
+                    emailVerified: true,
+                    mfaEnabled: false,
+                };
             })
         );
     }

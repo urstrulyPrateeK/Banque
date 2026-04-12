@@ -11,15 +11,15 @@ export const environment = {
     refreshTokenKey: 'refresh_token',
     tokenExpiryKey: 'token_expiry',
 
-    // Firebase
+    // Firebase — placeholders replaced at build time via Dockerfile sed
     firebase: {
         apiKey: '__FIREBASE_API_KEY__',
-        authDomain: 'banque-smart-banking.firebaseapp.com',
-        projectId: 'banque-smart-banking',
-        storageBucket: 'banque-smart-banking.firebasestorage.app',
-        messagingSenderId: '807836746111',
-        appId: '1:807836746111:web:b05b32d59739ae9a74da4a',
-        measurementId: 'G-R9F6BX5ZLP',
+        authDomain: '__FIREBASE_AUTH_DOMAIN__',
+        projectId: '__FIREBASE_PROJECT_ID__',
+        storageBucket: '__FIREBASE_STORAGE_BUCKET__',
+        messagingSenderId: '__FIREBASE_MESSAGING_SENDER_ID__',
+        appId: '__FIREBASE_APP_ID__',
+        measurementId: '__FIREBASE_MEASUREMENT_ID__',
     },
 
     // Fast2SMS (OTP)

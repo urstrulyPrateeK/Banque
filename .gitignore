@@ -88,8 +88,7 @@ docker-data/
 ############################
 # Firebase / API Keys
 ############################
-**/environments/environment.ts
-**/environments/environment.production.ts
+# environment files contain only placeholder tokens — real secrets are injected at build time
 .env
 .env.local
 .env.production

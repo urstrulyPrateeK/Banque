@@ -14,6 +14,12 @@ export const AUTH_ROUTES: Routes = [
         title: 'Create Account - Banque',
     },
     {
+        path: 'onboarding',
+        loadComponent: () =>
+            import('./components/onboarding/onboarding.component').then((m) => m.OnboardingComponent),
+        title: 'Set Up Your Account - Banque',
+    },
+    {
         path: 'verify-otp',
         loadComponent: () =>
             import('./components/two-factor/two-factor.component').then((m) => m.TwoFactorComponent),
@@ -49,4 +55,3 @@ export const AUTH_ROUTES: Routes = [
         pathMatch: 'full',
     },
 ];
-

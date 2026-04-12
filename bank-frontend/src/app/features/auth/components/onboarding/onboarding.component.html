@@ -1,0 +1,159 @@
+<div class="onboarding-page">
+    <div class="onboarding-left">
+        <div class="onboarding-brand">
+            <img src="banque-mark.svg" alt="Banque" class="brand-logo">
+            <span class="brand-name">Banque</span>
+        </div>
+        <div class="onboarding-hero">
+            <h2>Set up your account.</h2>
+            <p>Complete your profile and make your first deposit to unlock the full Banque experience.</p>
+            <div class="step-indicators">
+                <div class="step-dot" [class.active]="currentStep() >= 1" [class.done]="currentStep() > 1">
+                    <span class="step-num">1</span>
+                    <span class="step-label">Profile</span>
+                </div>
+                <div class="step-line" [class.active]="currentStep() > 1"></div>
+                <div class="step-dot" [class.active]="currentStep() >= 2">
+                    <span class="step-num">2</span>
+                    <span class="step-label">Deposit</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="onboarding-right">
+        <div class="onboarding-card">
+            @if (currentStep() === 1) {
+                <div class="card-header">
+                    <h1>Your Profile</h1>
+                    <p>Tell us a bit about yourself</p>
+                </div>
+
+                <form [formGroup]="profileForm" (ngSubmit)="nextStep()" class="onboarding-form">
+                    <div class="form-row-2col">
+                        <div class="form-field">
+                            <label for="firstName">First Name</label>
+                            <div class="input-wrap" [class.has-error]="getFieldError(profileForm, 'firstName')">
+                                <input id="firstName" type="text" formControlName="firstName" placeholder="e.g. Prateek">
+                            </div>
+                            @if (getFieldError(profileForm, 'firstName'); as error) {
+                                <span class="field-error">{{ error }}</span>
+                            }
+                        </div>
+                        <div class="form-field">
+                            <label for="lastName">Last Name</label>
+                            <div class="input-wrap" [class.has-error]="getFieldError(profileForm, 'lastName')">
+                                <input id="lastName" type="text" formControlName="lastName" placeholder="e.g. Singh">
+                            </div>
+                            @if (getFieldError(profileForm, 'lastName'); as error) {
+                                <span class="field-error">{{ error }}</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="email">Email Address</label>
+                        <div class="input-wrap" [class.has-error]="getFieldError(profileForm, 'email')">
+                            <svg class="field-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" /><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" /></svg>
+                            <input id="email" type="email" formControlName="email" placeholder="you@example.com">
+                        </div>
+                        @if (getFieldError(profileForm, 'email'); as error) {
+                            <span class="field-error">{{ error }}</span>
+                        }
+                    </div>
+
+                    <div class="form-row-2col">
+                        <div class="form-field">
+                            <label for="phone">Phone Number</label>
+                            <div class="input-wrap" [class.has-error]="getFieldError(profileForm, 'phone')">
+                                <input id="phone" type="tel" formControlName="phone" placeholder="+91 9876543210">
+                            </div>
+                            @if (getFieldError(profileForm, 'phone'); as error) {
+                                <span class="field-error">{{ error }}</span>
+                            }
+                        </div>
+                        <div class="form-field">
+                            <label for="dateOfBirth">Date of Birth</label>
+                            <div class="input-wrap" [class.has-error]="getFieldError(profileForm, 'dateOfBirth')">
+                                <input id="dateOfBirth" type="date" formControlName="dateOfBirth">
+                            </div>
+                            @if (getFieldError(profileForm, 'dateOfBirth'); as error) {
+                                <span class="field-error">{{ error }}</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="address">Address <span class="optional">(optional)</span></label>
+                        <div class="input-wrap">
+                            <input id="address" type="text" formControlName="address" placeholder="123 Main Street, City">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">
+                        <span>Continue to Deposit</span>
+                        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    </button>
+                </form>
+            }
+
+            @if (currentStep() === 2) {
+                <div class="card-header">
+                    <h1>Initial Deposit</h1>
+                    <p>Fund your new account to get started</p>
+                </div>
+
+                <form [formGroup]="depositForm" (ngSubmit)="onSubmit()" class="onboarding-form">
+                    <div class="deposit-presets">
+                        @for (amount of depositPresets; track amount) {
+                            <button type="button" class="preset-btn"
+                                [class.active]="depositForm.get('initialDeposit')?.value === amount"
+                                (click)="setDeposit(amount)">
+                                {{ amount | currency:'USD':'symbol':'1.0-0' }}
+                            </button>
+                        }
+                    </div>
+
+                    <div class="form-field deposit-field">
+                        <label for="initialDeposit">Or enter a custom amount</label>
+                        <div class="input-wrap deposit-input" [class.has-error]="getFieldError(depositForm, 'initialDeposit')">
+                            <span class="currency-symbol">$</span>
+                            <input id="initialDeposit" type="number" formControlName="initialDeposit"
+                                placeholder="1000" min="100" max="1000000" step="100">
+                        </div>
+                        @if (getFieldError(depositForm, 'initialDeposit'); as error) {
+                            <span class="field-error">{{ error }}</span>
+                        }
+                    </div>
+
+                    <div class="deposit-split-preview">
+                        <div class="split-item">
+                            <span class="split-label">Savings (70%)</span>
+                            <strong>{{ (depositForm.get('initialDeposit')?.value || 0) * 0.7 | currency:'USD':'symbol':'1.2-2' }}</strong>
+                        </div>
+                        <div class="split-item">
+                            <span class="split-label">Checking (30%)</span>
+                            <strong>{{ (depositForm.get('initialDeposit')?.value || 0) * 0.3 | currency:'USD':'symbol':'1.2-2' }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="back-btn" (click)="prevStep()">
+                            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                            <span>Back</span>
+                        </button>
+                        <button type="submit" class="submit-btn" [class.loading]="isSubmitting()" [disabled]="isSubmitting()">
+                            @if (isSubmitting()) {
+                                <span class="spinner"></span>
+                                <span>Creating account...</span>
+                            } @else {
+                                <span>Create My Account</span>
+                                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                            }
+                        </button>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</div>

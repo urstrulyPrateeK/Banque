@@ -41,19 +41,6 @@ const initialState: AuthState = {
     sessionId: null,
 };
 
-const DEMO_USER: User = {
-    id: 1,
-    username: 'prateek',
-    email: 'prateek@banque.dev',
-    firstName: 'Prateek',
-    lastName: 'Singh',
-    role: 'USER',
-    active: true,
-    emailVerified: true,
-    mfaEnabled: false,
-    createdAt: new Date().toISOString(),
-};
-
 const DEMO_TOKEN = 'demo_access_token_banque_2025';
 
 export const AuthStore = signalStore(
@@ -65,7 +52,7 @@ export const AuthStore = signalStore(
         fullName: computed(() => {
             const u = user();
             if (!u) return '';
-            return u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : u.username || '';
+            return u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : u.firstName || u.username || '';
         }),
         userInitials: computed(() => {
             const u = user();
@@ -83,10 +70,32 @@ export const AuthStore = signalStore(
             notificationService = inject(NotificationService),
             firestoreService = inject(FirestoreService)
         ) => {
-            async function activateDemoSession(): Promise<void> {
+            function buildDemoUser(username: string): User {
+                const capitalized = username.charAt(0).toUpperCase() + username.slice(1);
+                return {
+                    id: 1,
+                    username,
+                    email: `${username}@banque.dev`,
+                    firstName: capitalized,
+                    lastName: '',
+                    role: 'USER',
+                    active: true,
+                    emailVerified: true,
+                    mfaEnabled: false,
+                    createdAt: new Date().toISOString(),
+                };
+            }
+
+            async function activateDemoSession(username: string): Promise<void> {
+                // Set per-user Firestore path
+                firestoreService.setUserId(username);
+
                 storageService.setToken(DEMO_TOKEN);
+                storageService.setItem('banque_username', username);
+
+                const demoUser = buildDemoUser(username);
                 patchState(store, {
-                    user: DEMO_USER,
+                    user: demoUser,
                     isAuthenticated: true,
                     isLoading: false,
                     mfaRequired: false,
@@ -94,17 +103,35 @@ export const AuthStore = signalStore(
                     error: null,
                 });
 
-                // Seed Firestore with demo data if not already done
+                // Check if this user has been set up before
                 try {
                     const isSeeded = await firestoreService.isSeeded();
                     if (!isSeeded) {
-                        await seedDemoData(firestoreService);
+                        // New user — redirect to onboarding
+                        notificationService.success(`Welcome to Banque, ${demoUser.firstName}! Let's set up your account.`);
+                        router.navigate(['/auth/onboarding']);
+                        return;
                     }
                 } catch (e) {
-                    console.warn('Firestore seeding skipped:', e);
+                    console.warn('Firestore seed check skipped:', e);
                 }
 
-                notificationService.success('Welcome, Prateek!');
+                // Existing user — load their profile from Firestore
+                try {
+                    const profile = await firestoreService.getDocument<any>(firestoreService.userPath());
+                    if (profile) {
+                        patchState(store, {
+                            user: {
+                                ...demoUser,
+                                firstName: profile['firstName'] || demoUser.firstName,
+                                lastName: profile['lastName'] || '',
+                                email: profile['email'] || demoUser.email,
+                            },
+                        });
+                    }
+                } catch { /* ignore */ }
+
+                notificationService.success(`Welcome back, ${store.user()?.firstName || username}!`);
                 router.navigate(['/dashboard']);
             }
 
@@ -119,18 +146,20 @@ export const AuthStore = signalStore(
                                         if (response?.accessToken) {
                                             storageService.setToken(response.accessToken);
                                             if (response.refreshToken) storageService.setRefreshToken(response.refreshToken);
+                                            // Set userId for real backend auth
+                                            firestoreService.setUserId(credentials.username);
                                             patchState(store, {
-                                                user: response.user ?? DEMO_USER,
+                                                user: response.user ?? buildDemoUser(credentials.username),
                                                 isAuthenticated: true,
                                                 isLoading: false,
                                             });
                                             notificationService.success('Welcome back!');
                                             router.navigate(['/dashboard']);
                                         } else {
-                                            activateDemoSession();
+                                            activateDemoSession(credentials.username);
                                         }
                                     },
-                                    error: () => activateDemoSession(),
+                                    error: () => activateDemoSession(credentials.username),
                                 })
                             )
                         )
@@ -168,7 +197,7 @@ export const AuthStore = signalStore(
                                     next: (response) => {
                                         if (response.accessToken) {
                                             storageService.setToken(response.accessToken);
-                                            patchState(store, { user: response.user ?? DEMO_USER, isAuthenticated: true, isLoading: false, mfaRequired: false });
+                                            patchState(store, { user: response.user ?? buildDemoUser('user'), isAuthenticated: true, isLoading: false, mfaRequired: false });
                                             router.navigate(['/dashboard']);
                                         }
                                     },
@@ -211,6 +240,8 @@ export const AuthStore = signalStore(
                     pipe(
                         tap(() => {
                             storageService.clearAll();
+                            storageService.removeItem('banque_username');
+                            firestoreService.clearUserId();
                             patchState(store, initialState);
                             notificationService.info('You have been logged out');
                             router.navigate(['/auth/login']);
@@ -223,8 +254,8 @@ export const AuthStore = signalStore(
                     if (token) {
                         patchState(store, { isLoading: true });
                         authService.getCurrentUser().subscribe({
-                            next: (user) => patchState(store, { user: user || DEMO_USER, isAuthenticated: true, isLoading: false }),
-                            error: () => patchState(store, { user: DEMO_USER, isAuthenticated: true, isLoading: false }),
+                            next: (user) => patchState(store, { user: user || buildDemoUser(firestoreService.userId), isAuthenticated: true, isLoading: false }),
+                            error: () => patchState(store, { user: buildDemoUser(firestoreService.userId), isAuthenticated: true, isLoading: false }),
                         });
                     }
                 },
@@ -235,97 +266,3 @@ export const AuthStore = signalStore(
         }
     )
 );
-
-// ─── Demo Data Seeding ───
-
-async function seedDemoData(fs: FirestoreService): Promise<void> {
-    // 1. User profile
-    await fs.setDocument(fs.userPath(), {
-        username: 'prateek',
-        email: 'prateek@banque.dev',
-        firstName: 'Prateek',
-        lastName: 'Singh',
-        phone: '+91 9876543210',
-        dateOfBirth: '2003-05-15',
-        address: '123 Tech Park, Sector 62, Noida, UP 201309',
-        role: 'USER',
-        active: true,
-        emailVerified: true,
-        mfaEnabled: false,
-        seeded: true,
-    });
-
-    // 2. Accounts
-    const savingsId = await fs.addDocument(fs.userCollection('accounts'), {
-        accountType: 'SAVINGS', nickname: 'Primary Savings',
-        currency: 'USD', balance: 28459.75, status: 'ACTIVE',
-        isPrimary: true, accountNumber: '4520 8834 2219',
-    });
-
-    const checkingId = await fs.addDocument(fs.userCollection('accounts'), {
-        accountType: 'CHECKING', nickname: 'Daily Checking',
-        currency: 'USD', balance: 5230.50, status: 'ACTIVE',
-        isPrimary: false, accountNumber: '4520 7712 4401',
-    });
-
-    // 3. Transactions
-    const txns = [
-        { type: 'DEPOSIT', amount: 4500, description: 'Salary — June 2025', accountId: savingsId, status: 'COMPLETED', category: 'Salary' },
-        { type: 'WITHDRAWAL', amount: 120, description: 'Grocery Store', accountId: checkingId, status: 'COMPLETED', category: 'Food' },
-        { type: 'WITHDRAWAL', amount: 45.99, description: 'Netflix Subscription', accountId: checkingId, status: 'COMPLETED', category: 'Entertainment' },
-        { type: 'DEPOSIT', amount: 1200, description: 'Freelance Payment — UI Project', accountId: savingsId, status: 'COMPLETED', category: 'Freelance' },
-        { type: 'WITHDRAWAL', amount: 89, description: 'Electricity Bill', accountId: checkingId, status: 'COMPLETED', category: 'Bills' },
-        { type: 'WITHDRAWAL', amount: 250, description: 'Amazon Purchase', accountId: checkingId, status: 'COMPLETED', category: 'Shopping' },
-        { type: 'DEPOSIT', amount: 500, description: 'Refund — Flight Cancellation', accountId: savingsId, status: 'COMPLETED', category: 'Refund' },
-    ];
-    for (let i = 0; i < txns.length; i++) {
-        const daysAgo = i * 3 + 1;
-        const date = new Date(); date.setDate(date.getDate() - daysAgo);
-        await fs.addDocument(fs.userCollection('transactions'), { ...txns[i], createdAt: date.toISOString() });
-    }
-
-    // 4. Transfers
-    await fs.addDocument(fs.userCollection('transfers'), {
-        type: 'INTERNAL', fromAccountId: checkingId, toAccountId: savingsId,
-        amount: 1000, description: 'Monthly savings transfer', status: 'COMPLETED',
-        createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    });
-
-    // 5. Cards
-    await fs.addDocument(fs.userCollection('cards'), {
-        type: 'DEBIT', cardNumber: '4520 •••• •••• 3847',
-        expiryDate: '09/2028', cardholderName: 'PRATEEK SINGH',
-        accountId: savingsId, status: 'ACTIVE',
-        onlineEnabled: true, contactlessEnabled: true, internationalEnabled: false,
-        createdAt: new Date().toISOString(),
-    });
-
-    // 6. Notifications
-    const notifs = [
-        { title: 'Account Created', message: 'Your Banque account has been set up successfully.', read: false, type: 'INFO' },
-        { title: 'Salary Received', message: 'You received $4,500.00 from Employer Corp.', read: false, type: 'CREDIT' },
-        { title: 'Card Activated', message: 'Your debit card ending in 3847 is now active.', read: true, type: 'INFO' },
-    ];
-    for (let i = 0; i < notifs.length; i++) {
-        const date = new Date(); date.setDate(date.getDate() - i);
-        await fs.addDocument(fs.userCollection('notifications'), { ...notifs[i], createdAt: date.toISOString() });
-    }
-
-    // 7. Activity log
-    const activities = [
-        { action: 'LOGIN', description: 'Logged in from Chrome on Windows', ip: '192.168.1.1' },
-        { action: 'ACCOUNT_CREATED', description: 'Created Primary Savings account' },
-        { action: 'CARD_ACTIVATED', description: 'Activated debit card ending in 3847' },
-    ];
-    for (let i = 0; i < activities.length; i++) {
-        const date = new Date(); date.setDate(date.getDate() - i);
-        await fs.addDocument(fs.userCollection('activity'), { ...activities[i], createdAt: date.toISOString() });
-    }
-
-    // 8. Settings
-    await fs.setDocument(`${fs.userPath()}/settings/preferences`, {
-        language: 'en', currency: 'USD', timezone: 'Asia/Kolkata',
-        emailNotifications: true, pushNotifications: true,
-        twoFactorEnabled: false, darkMode: false,
-    });
-}
