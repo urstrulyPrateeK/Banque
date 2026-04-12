@@ -86,29 +86,17 @@ export const AuthStore = signalStore(
                 };
             }
 
-            async function activateDemoSession(username: string): Promise<void> {
-                // Set per-user Firestore path
+            async function handleLoginSuccess(username: string): Promise<void> {
+                // Set per-user Firestore path (whether real or demo)
                 firestoreService.setUserId(username);
-
-                storageService.setToken(DEMO_TOKEN);
-                storageService.setItem('banque_username', username);
-
-                const demoUser = buildDemoUser(username);
-                patchState(store, {
-                    user: demoUser,
-                    isAuthenticated: true,
-                    isLoading: false,
-                    mfaRequired: false,
-                    sessionId: null,
-                    error: null,
-                });
 
                 // Check if this user has been set up before
                 try {
                     const isSeeded = await firestoreService.isSeeded();
                     if (!isSeeded) {
                         // New user — redirect to onboarding
-                        notificationService.success(`Welcome to Banque, ${demoUser.firstName}! Let's set up your account.`);
+                        const name = store.user()?.firstName || username;
+                        notificationService.success(`Welcome to Banque, ${name}! Let's set up your account.`);
                         router.navigate(['/auth/onboarding']);
                         return;
                     }
@@ -116,17 +104,17 @@ export const AuthStore = signalStore(
                     console.warn('Firestore seed check skipped:', e);
                 }
 
-                // Existing user — load their profile from Firestore
+                // Existing user — load their profile from Firestore (if it exists)
                 try {
                     const profile = await firestoreService.getDocument<any>(firestoreService.userPath());
                     if (profile) {
                         patchState(store, {
                             user: {
-                                ...demoUser,
-                                firstName: profile['firstName'] || demoUser.firstName,
-                                lastName: profile['lastName'] || '',
-                                email: profile['email'] || demoUser.email,
-                            },
+                                ...store.user(),
+                                firstName: profile['firstName'] || store.user()?.firstName,
+                                lastName: profile['lastName'] || store.user()?.lastName || '',
+                                email: profile['email'] || store.user()?.email,
+                            } as User,
                         });
                     }
                 } catch { /* ignore */ }
@@ -135,31 +123,49 @@ export const AuthStore = signalStore(
                 router.navigate(['/dashboard']);
             }
 
+            async function activateDemoSession(username: string): Promise<void> {
+                storageService.setToken(DEMO_TOKEN);
+                storageService.setItem('banque_username', username);
+
+                // Initialize the basic demo user state first
+                patchState(store, {
+                    user: buildDemoUser(username),
+                    isAuthenticated: true,
+                    isLoading: false,
+                    mfaRequired: false,
+                    sessionId: null,
+                    error: null,
+                });
+
+                // Then run the centralized routing and data loading
+                await handleLoginSuccess(username);
+            }
+
             return {
                 login: rxMethod<LoginRequest>(
                     pipe(
-                        tap(() => patchState(store, { isLoading: true, error: null })),
+                        tap(() => patchState(store, { isLoading: true, error: null })) ,
                         switchMap((credentials) =>
                             authService.login(credentials).pipe(
                                 tapResponse({
-                                    next: (response) => {
+                                    next: async (response) => {
                                         if (response?.accessToken) {
                                             storageService.setToken(response.accessToken);
                                             if (response.refreshToken) storageService.setRefreshToken(response.refreshToken);
-                                            // Set userId for real backend auth
-                                            firestoreService.setUserId(credentials.username);
+                                            
                                             patchState(store, {
                                                 user: response.user ?? buildDemoUser(credentials.username),
                                                 isAuthenticated: true,
                                                 isLoading: false,
                                             });
-                                            notificationService.success('Welcome back!');
-                                            router.navigate(['/dashboard']);
+
+                                            // Trigger proper routing/Firebase checks even for real backend hits
+                                            await handleLoginSuccess(credentials.username);
                                         } else {
-                                            activateDemoSession(credentials.username);
+                                            await activateDemoSession(credentials.username);
                                         }
                                     },
-                                    error: () => activateDemoSession(credentials.username),
+                                    error: async () => await activateDemoSession(credentials.username),
                                 })
                             )
                         )
