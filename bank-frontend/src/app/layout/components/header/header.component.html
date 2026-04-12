@@ -1,6 +1,10 @@
 <header class="app-header">
     <div class="header-left">
-        <h1 class="page-title">Dashboard</h1>
+        <span class="eyebrow">Scalable &amp; reliable</span>
+        <div class="title-stack">
+            <h1 class="page-title">Operations center</h1>
+            <p>Cross-functional banking workflows across accounts, transfers, payments, and compliance evidence.</p>
+        </div>
     </div>
 
     <div class="header-right">
@@ -15,7 +19,10 @@
         <div class="user-menu">
             <button class="user-menu-btn" (click)="navigateToProfile()">
                 <div class="user-avatar">{{ authStore.userInitials() }}</div>
-                <span class="user-name">{{ authStore.fullName() }}</span>
+                <div class="user-copy">
+                    <span class="user-name">{{ authStore.fullName() || 'Banque user' }}</span>
+                    <small>{{ authStore.userEmail() || 'secured workspace' }}</small>
+                </div>
                 <svg viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                         d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"

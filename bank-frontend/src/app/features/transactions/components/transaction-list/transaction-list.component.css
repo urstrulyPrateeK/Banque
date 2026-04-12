@@ -1,0 +1,232 @@
+.transaction-page {
+    display: grid;
+    gap: 1.2rem;
+}
+
+.transaction-hero {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.6rem;
+    background:
+        radial-gradient(circle at top right, rgba(115, 234, 212, 0.2), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(244, 250, 253, 0.9));
+}
+
+.transaction-hero h1 {
+    margin: 1rem 0 0.5rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--banque-navy);
+}
+
+.transaction-hero p {
+    margin: 0;
+    color: var(--banque-slate);
+}
+
+.search-shell {
+    min-width: min(100%, 24rem);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.95rem 1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(13, 39, 65, 0.08);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: var(--banque-shadow-soft);
+}
+
+.search-shell svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--banque-slate);
+}
+
+.search-shell input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--banque-ink);
+}
+
+.error-banner {
+    padding: 1rem 1.2rem;
+    border-radius: 18px;
+    background: rgba(198, 81, 92, 0.12);
+    color: var(--banque-danger);
+    font-weight: 600;
+}
+
+.transaction-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.transaction-card {
+    display: grid;
+    gap: 1rem;
+    padding: 1.3rem;
+}
+
+.transaction-top,
+.transaction-body {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.type-pill,
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.type-pill.credit {
+    background: rgba(22, 138, 104, 0.12);
+    color: var(--banque-success);
+}
+
+.type-pill.debit {
+    background: rgba(198, 81, 92, 0.12);
+    color: var(--banque-danger);
+}
+
+.status-pill {
+    background: rgba(7, 26, 46, 0.06);
+    color: var(--banque-slate);
+}
+
+.transaction-body h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--banque-navy);
+}
+
+.transaction-body p {
+    margin: 0.35rem 0 0;
+    color: var(--banque-slate);
+}
+
+.amount-block {
+    white-space: nowrap;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.amount-block.credit {
+    color: var(--banque-success);
+}
+
+.amount-block.debit {
+    color: var(--banque-danger);
+}
+
+.transaction-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.8rem;
+    margin: 0;
+}
+
+.transaction-meta div {
+    padding: 0.9rem;
+    border-radius: 16px;
+    background: rgba(7, 26, 46, 0.04);
+}
+
+.transaction-meta dt {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--banque-slate);
+}
+
+.transaction-meta dd {
+    margin: 0.35rem 0 0;
+    color: var(--banque-navy);
+    font-weight: 600;
+}
+
+.pagination-shell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+}
+
+.page-size {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--banque-slate);
+}
+
+.page-size select {
+    padding: 0.6rem 0.8rem;
+    border-radius: 14px;
+    border: 1px solid rgba(13, 39, 65, 0.08);
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.pagination-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--banque-slate);
+}
+
+.page-btn {
+    padding: 0.7rem 1rem;
+    border: 1px solid rgba(13, 39, 65, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--banque-ink);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.page-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.loading-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.loading-card {
+    min-height: 280px;
+}
+
+@media (max-width: 1024px) {
+    .transaction-grid,
+    .loading-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .transaction-hero,
+    .pagination-shell,
+    .pagination-actions,
+    .transaction-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .transaction-meta {
+        grid-template-columns: 1fr;
+    }
+}

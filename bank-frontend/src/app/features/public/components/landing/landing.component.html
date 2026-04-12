@@ -1,27 +1,46 @@
 <div class="landing-page">
-    <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-content">
-            <h1 class="hero-title">Banking Made Simple, Secure, and Smart</h1>
+            <span class="eyebrow">Banque platform</span>
+            <h1 class="hero-title">Smart Banking Infrastructure for modern financial operations.</h1>
             <p class="hero-subtitle">
-                Experience the future of banking with our comprehensive digital platform. 
-                Manage your finances with confidence and ease.
+                Banque combines Angular, Spring Boot, secure document flows, and operational telemetry into one product surface built for scalable banking workflows.
             </p>
             <div class="hero-actions">
-                <a routerLink="/auth/register" class="btn-primary">Get Started</a>
-                <a routerLink="/auth/login" class="btn-secondary">Sign In</a>
+                <a routerLink="/auth/register" class="pill-button primary">Launch Workspace</a>
+                <a routerLink="/auth/login" class="pill-button secondary">Sign In</a>
+            </div>
+            <div class="architecture-strip">
+                @for (layer of architectureLayers; track layer) {
+                    <div class="architecture-chip">{{ layer }}</div>
+                }
             </div>
         </div>
         <div class="hero-image">
-            <div class="hero-graphic">
-                <div class="floating-card card-1">💳</div>
-                <div class="floating-card card-2">💰</div>
-                <div class="floating-card card-3">📊</div>
+            <div class="hero-graphic section-shell">
+                <div class="signal-column">
+                    <span>Live balance cache</span>
+                    <strong>99.95%</strong>
+                    <small>Read pressure reduced under load with Caffeine-backed balance fetches.</small>
+                </div>
+                <div class="signal-grid">
+                    <div class="signal-card">
+                        <span>Secure documents</span>
+                        <strong>Signed URLs</strong>
+                    </div>
+                    <div class="signal-card">
+                        <span>Transfers</span>
+                        <strong>Serializable</strong>
+                    </div>
+                    <div class="signal-card wide">
+                        <span>Platform telemetry</span>
+                        <strong>Micrometer metrics and searchable activity history</strong>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
     <section class="stats-section">
         <div class="stats-container">
             @for (stat of stats; track stat.label) {
@@ -33,15 +52,13 @@
         </div>
     </section>
 
-    <!-- Features Section -->
     <section class="features-section">
         <div class="section-container">
-            <h2 class="section-title">Why Choose Banque?</h2>
-            <p class="section-subtitle">Everything you need for modern banking in one place</p>
+            <h2 class="section-title">Built for high-trust workflows, not demo gloss.</h2>
+            <p class="section-subtitle">Every surface in Banque is designed to make sensitive banking operations legible, safe, and fast to act on.</p>
             <div class="features-grid">
                 @for (feature of features; track feature.title) {
-                    <div class="feature-card">
-                        <div class="feature-icon">{{ feature.icon }}</div>
+                    <div class="feature-card surface-card">
                         <h3 class="feature-title">{{ feature.title }}</h3>
                         <p class="feature-description">{{ feature.description }}</p>
                     </div>
@@ -50,13 +67,11 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
     <section class="cta-section">
-        <div class="cta-container">
-            <h2 class="cta-title">Ready to Get Started?</h2>
-            <p class="cta-subtitle">Join thousands of satisfied customers banking with Banque</p>
-            <a routerLink="/auth/register" class="btn-primary large">Create Your Account</a>
+        <div class="cta-container section-shell">
+            <h2 class="cta-title">One platform for customer flows, payments, transfers, and compliance evidence.</h2>
+            <p class="cta-subtitle">Start with the live Angular experience, then move through the same Spring Boot service that powers APIs, metrics, and deployment.</p>
+            <a routerLink="/auth/register" class="pill-button primary">Create Your Workspace</a>
         </div>
     </section>
 </div>
-

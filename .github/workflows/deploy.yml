@@ -1,0 +1,50 @@
+name: Deploy Banque
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  verify-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: bank-frontend/package-lock.json
+
+      - name: Backend tests
+        working-directory: bank-backend
+        run: ./mvnw -B test
+
+      - name: Frontend build
+        working-directory: bank-frontend
+        run: npm ci && npm run build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Submit Cloud Build
+        run: |
+          gcloud builds submit \
+            --config cloudbuild.yaml \
+            --substitutions=_REGION=${{ secrets.GCP_REGION }},_REPOSITORY=${{ secrets.GCP_ARTIFACT_REPOSITORY }}

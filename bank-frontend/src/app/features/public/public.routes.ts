@@ -4,7 +4,7 @@ export const PUBLIC_ROUTES: Routes = [
     {
         path: '',
         loadComponent: () => import('./components/landing/landing.component').then(m => m.LandingComponent),
-        title: 'Banque - Banking Made Simple'
+        title: 'Banque | Smart Banking Infrastructure'
     },
     {
         path: 'about',

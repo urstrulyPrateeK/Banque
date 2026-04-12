@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -13,41 +13,33 @@ import { RouterLink } from '@angular/router';
 export class LandingComponent {
     protected readonly features = [
         {
-            icon: '💳',
-            title: 'Digital Banking',
-            description: 'Manage your accounts, transfer funds, and pay bills all from one secure platform.'
+            title: 'Resilient transaction workflows',
+            description: 'Handle transfers, receipts, and dispute-ready histories from a single operational surface.',
         },
         {
-            icon: '🔒',
-            title: 'Bank-Level Security',
-            description: 'Your data is protected with industry-leading encryption and security measures.'
+            title: 'Document storage with signed access',
+            description: 'Upload KYC and profile documents into cloud-backed storage with time-limited retrieval.',
         },
         {
-            icon: '📱',
-            title: 'Mobile First',
-            description: 'Access your accounts anywhere, anytime with our responsive mobile-friendly design.'
+            title: 'Operational observability',
+            description: 'Metrics, health endpoints, and search-first interfaces keep activity visible as usage scales.',
         },
         {
-            icon: '⚡',
-            title: 'Fast Transactions',
-            description: 'Instant transfers and real-time updates keep you in control of your finances.'
+            title: 'Angular-first operator experience',
+            description: 'Reactive dashboards, polished flows, and responsive components built for everyday use.',
         },
-        {
-            icon: '📊',
-            title: 'Financial Insights',
-            description: 'Track your spending, set budgets, and get personalized financial recommendations.'
-        },
-        {
-            icon: '🌍',
-            title: 'Global Access',
-            description: 'Bank from anywhere in the world with our international banking services.'
-        }
     ];
 
     protected readonly stats = [
-        { value: '2M+', label: 'Active Users' },
-        { value: '$50B+', label: 'Assets Managed' },
-        { value: '99.9%', label: 'Uptime' },
-        { value: '24/7', label: 'Support' }
+        { value: '<100ms', label: 'Dashboard repaint target' },
+        { value: '15 min', label: 'Signed document access window' },
+        { value: 'SERIALIZABLE', label: 'Transfer isolation mode' },
+        { value: '/actuator', label: 'Metrics and health surface' },
+    ];
+
+    protected readonly architectureLayers = [
+        'Angular 21 experience layer',
+        'Spring Boot 4 orchestration',
+        'PostgreSQL + cache + cloud storage',
     ];
 }

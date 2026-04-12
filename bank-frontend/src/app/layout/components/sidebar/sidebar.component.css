@@ -1,7 +1,9 @@
 .sidebar {
     width: 260px;
     height: 100vh;
-    background: linear-gradient(180deg, #1a1f2e 0%, #2d3448 100%);
+    background:
+        radial-gradient(circle at top, rgba(115, 234, 212, 0.17), transparent 30%),
+        linear-gradient(180deg, #071a2e 0%, #0b2239 52%, #103252 100%);
     display: flex;
     flex-direction: column;
     transition: width 0.3s ease;
@@ -31,10 +33,22 @@
     cursor: pointer;
 }
 
-.logo svg {
+.logo img {
     width: 32px;
     height: 32px;
     flex-shrink: 0;
+    border-radius: 12px;
+    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.22);
+}
+
+.logo-copy {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-copy small {
+    color: rgba(220, 233, 243, 0.7);
+    font-size: 0.72rem;
 }
 
 .logo-text {
@@ -44,8 +58,8 @@
 }
 
 .collapse-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 0.5rem;
     padding: 0.5rem;
     cursor: pointer;
@@ -77,12 +91,21 @@
     overflow-y: auto;
 }
 
+.nav-caption {
+    color: rgba(220, 233, 243, 0.62);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 1rem 0.55rem;
+}
+
 .nav-item {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem 1rem;
-    border-radius: 0.625rem;
+    border-radius: 1rem;
     color: rgba(255, 255, 255, 0.7);
     text-decoration: none;
     transition: all 0.2s;
@@ -92,11 +115,13 @@
 .nav-item:hover {
     background: rgba(255, 255, 255, 0.1);
     color: white;
+    transform: translateX(2px);
 }
 
 .nav-item.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, rgba(31, 168, 162, 0.92), rgba(47, 142, 203, 0.92));
     color: white;
+    box-shadow: 0 18px 30px rgba(31, 168, 162, 0.2);
 }
 
 .nav-item svg {
@@ -120,6 +145,22 @@
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.workspace-chip {
+    display: grid;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+    padding: 0.95rem;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.workspace-chip span {
+    color: rgba(220, 233, 243, 0.7);
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
 .user-info {
     display: flex;
     align-items: center;
@@ -130,7 +171,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--banque-teal), var(--banque-cyan));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -169,8 +210,11 @@
     }
 
     .logo-text,
+    .logo-copy small,
     .nav-label,
-    .user-details {
+    .user-details,
+    .workspace-chip,
+    .nav-caption {
         display: none;
     }
 

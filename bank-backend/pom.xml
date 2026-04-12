@@ -8,11 +8,11 @@
         <version>4.0.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.bank</groupId>
-    <artifactId>bank-backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>bank-backend</name>
-    <description>bank-backend</description>
+    <groupId>dev.prateek</groupId>
+    <artifactId>banque</artifactId>
+    <version>1.0.0</version>
+    <name>Banque Banking Platform</name>
+    <description>Enterprise banking infrastructure built by Prateek Singh</description>
     <url/>
     <licenses>
         <license/>

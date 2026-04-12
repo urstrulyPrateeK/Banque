@@ -1,0 +1,73 @@
+<section class="upload-card surface-card banque-enter">
+    <div class="upload-header">
+        <div>
+            <span class="eyebrow">GCP Document Flow</span>
+            <h3>Secure onboarding documents</h3>
+            <p>Upload KYC or profile files into Banque storage with time-limited access links.</p>
+        </div>
+        <div class="trust-chip">
+            <span></span>
+            Signed access
+        </div>
+    </div>
+
+    <div class="type-selector">
+        @for (option of documentTypes; track trackType($index, option)) {
+            <button
+                type="button"
+                class="type-pill"
+                [class.active]="selectedType() === option.value"
+                (click)="selectedType.set(option.value)">
+                <strong>{{ option.label }}</strong>
+                <small>{{ option.helper }}</small>
+            </button>
+        }
+    </div>
+
+    <label
+        class="drop-zone"
+        [class.drag-active]="dragActive()"
+        [class.uploading]="isUploading()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+        <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="onFileSelected($event)">
+        <div class="drop-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 16V7m0 0l-4 4m4-4l4 4M5 17.5A3.5 3.5 0 018.5 14H9m6.5 3.5A3.5 3.5 0 0012 14h-1" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+        <h4>{{ isUploading() ? 'Encrypting and uploading...' : 'Drop documents here or browse securely' }}</h4>
+        <p>PDF, PNG, JPG up to 10 MB. Files stay behind signed access URLs.</p>
+    </label>
+
+    @if (errorMessage()) {
+        <p class="error-message">{{ errorMessage() }}</p>
+    }
+
+    <div class="upload-meta">
+        <div class="meta-card">
+            <span class="meta-label">Latest upload</span>
+            <strong>{{ lastUpload()?.originalFileName || 'No recent upload yet' }}</strong>
+            <small>
+                @if (lastUpload()) {
+                    {{ lastUpload()?.storageProvider }} • {{ lastUpload()?.uploadedAt | date:'medium' }}
+                } @else {
+                    Ready for first document handoff
+                }
+            </small>
+        </div>
+
+        <div class="meta-card">
+            <span class="meta-label">KYC access</span>
+            <strong>{{ latestDocument()?.originalFileName || 'No KYC on file yet' }}</strong>
+            <small>
+                @if (latestDocument()) {
+                    <a [href]="latestDocument()?.accessUrl" target="_blank" rel="noreferrer">Open signed file</a>
+                } @else {
+                    Upload KYC to generate a signed retrieval link.
+                }
+            </small>
+        </div>
+    </div>
+</section>

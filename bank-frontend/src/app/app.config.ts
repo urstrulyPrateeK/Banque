@@ -5,7 +5,6 @@ import {
 import {
   provideRouter,
   withComponentInputBinding,
-  withHashLocation,
 } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
@@ -16,7 +15,7 @@ import { errorInterceptor } from '@core/interceptors/error.interceptor';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withComponentInputBinding(), withHashLocation()),
+    provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
   ],
 };

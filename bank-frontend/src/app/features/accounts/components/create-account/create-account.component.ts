@@ -1,16 +1,16 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy, OnInit, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AccountStore } from '../../store/account.store';
 import { AccountApiService } from '../../services/account-api.service';
-import { CreateAccountRequest, AccountTypesResponse } from '@core/models';
+import { CreateAccountRequest } from '@core/models';
 import { catchError, of } from 'rxjs';
 
 @Component({
     selector: 'app-create-account',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterLink],
+    imports: [CommonModule, ReactiveFormsModule],
     templateUrl: './create-account.component.html',
     styleUrl: './create-account.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,

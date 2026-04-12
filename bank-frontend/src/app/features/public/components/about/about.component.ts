@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+// Banque - by Prateek Singh | github.com/prateeksingh
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -13,32 +14,43 @@ import { RouterLink } from '@angular/router';
 export class AboutComponent {
     protected readonly values = [
         {
-            icon: '🎯',
-            title: 'Customer First',
-            description: 'We put our customers at the heart of everything we do, ensuring their financial success is our top priority.'
+            icon: '01',
+            title: 'Operational clarity',
+            description: 'Account health, transaction context, and portfolio totals stay visible so users can act without hunting through noisy screens.',
         },
         {
-            icon: '🔒',
-            title: 'Security & Trust',
-            description: 'Your financial data is protected with bank-level encryption and industry-leading security measures.'
+            icon: '02',
+            title: 'Guardrails by default',
+            description: 'JWT auth, 2FA, signed document access, and serializable transfers keep sensitive flows constrained and auditable.',
         },
         {
-            icon: '💡',
-            title: 'Innovation',
-            description: 'We continuously innovate to provide cutting-edge banking solutions that make your life easier.'
+            icon: '03',
+            title: 'Cloud-ready architecture',
+            description: 'The platform is designed to move cleanly between local development, single-service hosting, and Google Cloud storage-backed deployments.',
         },
         {
-            icon: '🤝',
-            title: 'Transparency',
-            description: 'Clear communication, no hidden fees, and complete transparency in all our services.'
-        }
+            icon: '04',
+            title: 'Fast feedback loops',
+            description: 'Signals, metrics, search, and in-product feedback make it easier to see what users need and tighten the product quickly.',
+        },
     ];
 
     protected readonly milestones = [
-        { year: '2020', event: 'Founded with a vision to revolutionize digital banking' },
-        { year: '2021', event: 'Reached 100,000 active users' },
-        { year: '2022', event: 'Launched mobile banking app' },
-        { year: '2023', event: 'Expanded to international markets' },
-        { year: '2024', event: 'Reached 2 million users milestone' }
+        {
+            year: 'Identity',
+            event: 'Banque was rebranded around a focused platform story: smart banking infrastructure with clear operational surfaces.',
+        },
+        {
+            year: 'Storage',
+            event: 'KYC and profile documents now flow through a cloud-ready storage layer with signed access and local fallback support.',
+        },
+        {
+            year: 'Scale',
+            event: 'Caching, metrics, structured logging, and serializable transfer safety were added to show reliability under pressure.',
+        },
+        {
+            year: 'UX',
+            event: 'The dashboard, search, upload, and feedback flows were redesigned to feel deliberate, modern, and easy to trust.',
+        },
     ];
 }

@@ -101,6 +101,7 @@ export interface SearchTransactionRequest {
     accountId?: number;
     type?: string;
     status?: string;
+    query?: string;
     startDate?: string;
     endDate?: string;
     minAmount?: number;

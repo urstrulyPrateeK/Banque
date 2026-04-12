@@ -3,7 +3,7 @@ services:
     build:
       context: ./bank-backend
       dockerfile: Dockerfile
-    container_name: bank-backend
+    container_name: banque-backend
     ports:
       - "${SERVER_PORT}:8080"
     env_file:
@@ -16,7 +16,7 @@ services:
     build:
       context: ./bank-frontend
       dockerfile: Dockerfile
-    container_name: bank-frontend
+    container_name: banque-frontend
     ports:
       - "4200:80"
     environment:
@@ -26,7 +26,7 @@ services:
 
   db:
     image: postgres:16
-    container_name: bank-postgres
+    container_name: banque-postgres
     env_file:
       - .env
     environment:

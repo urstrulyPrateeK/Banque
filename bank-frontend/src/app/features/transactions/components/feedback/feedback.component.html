@@ -1,0 +1,38 @@
+<div class="feedback-shell" [class.submitted]="submitted()">
+    <div class="feedback-actions">
+        <button
+            type="button"
+            class="feedback-btn"
+            [class.active]="selectedSentiment() === true"
+            [disabled]="submitted()"
+            (click)="chooseSentiment(true)"
+            aria-label="Thumbs up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                <path d="M7 11v9M7 11H4a1 1 0 00-1 1v7a1 1 0 001 1h3m0-9l4-7a2 2 0 012 2v3h5.5a1.5 1.5 0 011.48 1.74l-1.1 7A2 2 0 0117.9 20H7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button>
+        <button
+            type="button"
+            class="feedback-btn"
+            [class.active]="selectedSentiment() === false"
+            [disabled]="submitted()"
+            (click)="chooseSentiment(false)"
+            aria-label="Thumbs down">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                <path d="M17 13V4m0 9h3a1 1 0 011 1v7a1 1 0 01-1 1h-3m0-9l-4 7a2 2 0 01-2-2v-3H5.5a1.5 1.5 0 01-1.48-1.74l1.1-7A2 2 0 016.1 4H17" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button>
+    </div>
+
+    <textarea
+        [disabled]="submitted()"
+        [ngModel]="comment()"
+        (ngModelChange)="comment.set($event)"
+        maxlength="250"
+        rows="2"
+        placeholder="Optional note for this transaction"></textarea>
+
+    <button type="button" class="send-btn" [disabled]="selectedSentiment() === null || isSubmitting() || submitted()" (click)="submit()">
+        {{ submitted() ? 'Saved' : isSubmitting() ? 'Saving...' : 'Send insight' }}
+    </button>
+</div>

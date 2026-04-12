@@ -1,6 +1,7 @@
 {
-  "name": "bank-frontend",
+  "name": "banque-frontend",
   "version": "0.0.0",
+  "description": "Angular 21 frontend for Banque by Prateek Singh",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

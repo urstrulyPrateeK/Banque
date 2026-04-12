@@ -1,11 +1,12 @@
 <aside class="sidebar" [class.collapsed]="isCollapsed()">
     <div class="sidebar-header">
         <div class="logo" (click)="expandSidebar()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" />
-            </svg>
+            <img src="banque-mark.svg" alt="Banque logo">
             @if (!isCollapsed()) {
-            <span class="logo-text">Banque</span>
+                <div class="logo-copy">
+                    <span class="logo-text">Banque</span>
+                    <small>Smart Banking Infrastructure</small>
+                </div>
             }
         </div>
         <button class="collapse-btn" (click)="toggleCollapse()"
@@ -21,6 +22,9 @@
     </div>
 
     <nav class="sidebar-nav">
+        @if (!isCollapsed()) {
+            <span class="nav-caption">Core operations</span>
+        }
         @for (item of navItems; track item.path) {
         <a [routerLink]="item.path" routerLinkActive="active" class="nav-item"
             [attr.title]="isCollapsed() ? item.label : null">
@@ -37,6 +41,10 @@
 
     <div class="sidebar-footer">
         @if (!isCollapsed()) {
+        <div class="workspace-chip">
+            <strong>Platform status</strong>
+            <span>Healthy services, cached balances, signed document access.</span>
+        </div>
         <div class="user-info">
             <div class="user-avatar">{{ authStore.userInitials() }}</div>
             <div class="user-details">

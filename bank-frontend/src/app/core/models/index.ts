@@ -6,3 +6,5 @@ export * from './pageable.model';
 export * from './transfer.model';
 export * from './payment.model';
 export * from './card.model';
+export * from './document.model';
+export * from './feedback.model';

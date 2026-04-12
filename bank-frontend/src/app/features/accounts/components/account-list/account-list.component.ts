@@ -1,13 +1,12 @@
 import { Component, inject, ChangeDetectionStrategy, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AccountStore } from '../../store/account.store';
-import { Account } from '@core/models';
 
 @Component({
     selector: 'app-account-list',
     standalone: true,
-    imports: [CommonModule, RouterLink, CurrencyPipe, DatePipe],
+    imports: [CommonModule, RouterLink, CurrencyPipe],
     templateUrl: './account-list.component.html',
     styleUrl: './account-list.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,

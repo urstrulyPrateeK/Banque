@@ -18,6 +18,6 @@ export class HeaderComponent {
     }
 
     protected navigateToProfile(): void {
-        this.router.navigate(['/profile']);
+        this.router.navigate(['/user/profile']);
     }
 }

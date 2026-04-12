@@ -20,6 +20,7 @@ export interface GetAllTransactionsParams {
     accountId?: number;
     type?: string;
     status?: string;
+    query?: string;
     startDate?: string;
     endDate?: string;
     minAmount?: number;
@@ -52,6 +53,9 @@ export class TransactionApiService {
         }
         if (params.status) {
             queryParams['status'] = params.status;
+        }
+        if (params.query) {
+            queryParams['query'] = params.query;
         }
         if (params.startDate) {
             queryParams['startDate'] = params.startDate;

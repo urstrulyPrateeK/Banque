@@ -1,72 +1,88 @@
-<div class="container mx-auto p-4">
-    <h1 class="text-2xl font-bold mb-4">Transactions</h1>
+<section class="transaction-page">
+    <div class="transaction-hero section-shell">
+        <div>
+            <span class="eyebrow">Searchable history</span>
+            <h1>Transaction ledger</h1>
+            <p>Debounced search, clear statuses, and inline feedback for each transaction touchpoint.</p>
+        </div>
+        <label class="search-shell">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <input type="search" [formControl]="searchControl" placeholder="Search by description, reference, or type">
+        </label>
+    </div>
 
-    @if (store.isLoading()) {
-        <div>Loading...</div>
-    } @else if (store.error()) {
-        <div class="text-red-500">{{ store.error() }}</div>
+    @if (store.error()) {
+        <div class="error-banner">{{ store.error() }}</div>
+    } @else if (store.isLoading()) {
+        <div class="transaction-grid loading-grid">
+            @for (_item of [1, 2, 3, 4]; track $index) {
+                <div class="surface-card skeleton loading-card"></div>
+            }
+        </div>
     } @else {
-        <div class="overflow-x-auto">
-            <table class="min-w-full bg-white">
-                <thead class="bg-gray-800 text-white">
-                    <tr>
-                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">ID</th>
-                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Type</th>
-                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Amount</th>
-                        <th class="w-1/4 py-3 px-4 uppercase font-semibold text-sm">Description</th>
-                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Status</th>
-                        <th class="w-1/6 py-3 px-4 uppercase font-semibold text-sm">Date</th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-700">
-                    @for (transaction of store.transactions(); track transaction.id) {
-                        <tr>
-                            <td class="w-1/6 py-3 px-4">{{ transaction.id }}</td>
-                            <td class="w-1/6 py-3 px-4">{{ transaction.transactionType }}</td>
-                            <td class="w-1/6 py-3 px-4">{{ transaction.amount | number:'1.2-2' }} {{ transaction.currency }}</td>
-                            <td class="w-1/4 py-3 px-4">{{ transaction.description }}</td>
-                            <td class="w-1/6 py-3 px-4">
-                                <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-sm">
-                                    {{ transaction.status }}
-                                </span>
-                            </td>
-                            <td class="w-1/6 py-3 px-4">{{ transaction.createdAt | date:'short' }}</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+        <div class="transaction-grid">
+            @for (transaction of store.transactions(); track trackTransaction($index, transaction)) {
+                <article class="transaction-card surface-card">
+                    <div class="transaction-top">
+                        <div class="type-pill" [class.credit]="asPositive(transaction.transactionType)" [class.debit]="!asPositive(transaction.transactionType)">
+                            {{ asPositive(transaction.transactionType) ? 'Inflow' : 'Outflow' }}
+                        </div>
+                        <div class="status-pill">{{ transaction.status }}</div>
+                    </div>
+
+                    <div class="transaction-body">
+                        <div>
+                            <h2>{{ transaction.description || transaction.reference || transaction.transactionType }}</h2>
+                            <p>#{{ transaction.id }} | {{ transaction.createdAt | date:'MMM d, y, h:mm a' }}</p>
+                        </div>
+                        <div class="amount-block" [class.credit]="asPositive(transaction.transactionType)" [class.debit]="!asPositive(transaction.transactionType)">
+                            {{ transaction.amount | currency:transaction.currency:'symbol':'1.2-2' }}
+                        </div>
+                    </div>
+
+                    <dl class="transaction-meta">
+                        <div>
+                            <dt>Reference</dt>
+                            <dd>{{ transaction.reference || 'System generated' }}</dd>
+                        </div>
+                        <div>
+                            <dt>Type</dt>
+                            <dd>{{ transaction.transactionType }}</dd>
+                        </div>
+                    </dl>
+
+                    <app-feedback
+                        [transactionId]="transaction.id"
+                        [transactionLabel]="transaction.description || transaction.reference || transaction.transactionType">
+                    </app-feedback>
+                </article>
+            }
         </div>
 
-        <div class="flex justify-between items-center mt-4">
-            <div>
-                <label for="pageSize" class="mr-2">Items per page:</label>
-              <select
-  id="pageSize"
-  [value]="store.pageable().size"
-  (change)="onPageSizeChange($any($event.target).value)">
-
+        <div class="pagination-shell surface-card">
+            <div class="page-size">
+                <label for="pageSize">Rows per page</label>
+                <select
+                    id="pageSize"
+                    [value]="store.pageable().size"
+                    (change)="onPageSizeChange($any($event.target).value)">
                     <option>10</option>
                     <option>25</option>
                     <option>50</option>
                 </select>
             </div>
-            <div>
-                <span>
-                    Page {{ (store.pagination()?.number ?? 0) + 1 }} of {{ store.pagination()?.totalPages ?? 0 }}
-                </span>
-                <button
-                    class="ml-2 px-3 py-1 border rounded"
-                    [disabled]="store.pagination()?.first"
-                    (click)="onPageChange((store.pagination()?.number ?? 0) - 1)">
+
+            <div class="pagination-actions">
+                <span>Page {{ (store.pagination()?.number ?? 0) + 1 }} of {{ store.pagination()?.totalPages ?? 0 }}</span>
+                <button class="page-btn" [disabled]="store.pagination()?.first" (click)="onPageChange((store.pagination()?.number ?? 0) - 1)">
                     Previous
                 </button>
-                <button
-                    class="ml-2 px-3 py-1 border rounded"
-                    [disabled]="store.pagination()?.last"
-                    (click)="onPageChange((store.pagination()?.number ?? 0) + 1)">
+                <button class="page-btn" [disabled]="store.pagination()?.last" (click)="onPageChange((store.pagination()?.number ?? 0) + 1)">
                     Next
                 </button>
             </div>
         </div>
     }
-</div>
+</section>
