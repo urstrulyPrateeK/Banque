@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="bankingapp/bank-frontend/public/banque-mark.svg" alt="Banque" width="64" height="64">
+  <img src="../bank-frontend/public/banque-mark.svg" alt="Banque" width="64" height="64">
 </p>
 
 <h1 align="center">Banque</h1>
