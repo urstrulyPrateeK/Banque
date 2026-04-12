@@ -26,3 +26,7 @@ services:
         value: banque-project-id
       - key: GCP_STORAGE_BUCKET
         value: banque-documents
+      - key: FIREBASE_API_KEY
+        sync: false
+      - key: FAST2SMS_API_KEY
+        sync: false

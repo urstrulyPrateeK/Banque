@@ -1,8 +1,15 @@
 FROM node:20 AS build
 WORKDIR /app
+ARG FIREBASE_API_KEY
+ARG FAST2SMS_API_KEY
+
 COPY package*.json ./
 RUN npm ci
+
 COPY . .
+RUN sed -i "s/__FIREBASE_API_KEY__/${FIREBASE_API_KEY}/g" src/environments/environment*.ts && \
+    sed -i "s/__FAST2SMS_API_KEY__/${FAST2SMS_API_KEY}/g" src/environments/environment*.ts
+
 RUN npm run build
 
 FROM nginx:alpine

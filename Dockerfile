@@ -1,10 +1,16 @@
 FROM node:20 AS frontend-build
 WORKDIR /frontend
 
-COPY bank-frontend/package*.json ./
+ARG FIREBASE_API_KEY
+ARG FAST2SMS_API_KEY
+
+COPY bank-frontend/ package*.json ./
 RUN npm ci
 
 COPY bank-frontend/ ./
+RUN sed -i "s/__FIREBASE_API_KEY__/${FIREBASE_API_KEY}/g" src/environments/environment*.ts && \
+    sed -i "s/__FAST2SMS_API_KEY__/${FAST2SMS_API_KEY}/g" src/environments/environment*.ts
+
 RUN npm run build
 
 FROM maven:3.9.4-eclipse-temurin-17 AS backend-build
