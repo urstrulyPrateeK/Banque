@@ -1,48 +1,49 @@
-<div class="landing-page">
-    <section class="hero-section">
-        <div class="hero-content">
-            <span class="eyebrow">Banque platform</span>
-            <h1 class="hero-title">Smart Banking Infrastructure for modern financial operations.</h1>
-            <p class="hero-subtitle">
-                Banque combines Angular, Spring Boot, secure document flows, and operational telemetry into one product surface built for scalable banking workflows.
-            </p>
-            <div class="hero-actions">
-                <a routerLink="/auth/register" class="pill-button primary">Launch Workspace</a>
-                <a routerLink="/auth/login" class="pill-button secondary">Sign In</a>
-            </div>
-            <div class="architecture-strip">
-                @for (layer of architectureLayers; track layer) {
-                    <div class="architecture-chip">{{ layer }}</div>
-                }
-            </div>
-        </div>
-        <div class="hero-image">
-            <div class="hero-graphic section-shell">
-                <div class="signal-column">
-                    <span>Live balance cache</span>
-                    <strong>99.95%</strong>
-                    <small>Read pressure reduced under load with Caffeine-backed balance fetches.</small>
+<div class="landing">
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-content">
+                <span class="eyebrow">Smart Banking Infrastructure</span>
+                <h1 class="hero-title">Banking that moves at the speed of your ambition.</h1>
+                <p class="hero-sub">Manage accounts, transfers, and compliance workflows from a single, secure platform built with Angular 21 and Spring Boot 4.</p>
+                <div class="hero-actions">
+                    @if (isLoggedIn()) {
+                        <a routerLink="/dashboard" class="pill-button primary">Go to Dashboard</a>
+                    } @else {
+                        <a routerLink="/auth/register" class="pill-button primary">Open an Account</a>
+                        <a routerLink="/auth/login" class="pill-button secondary">Sign In →</a>
+                    }
                 </div>
-                <div class="signal-grid">
-                    <div class="signal-card">
-                        <span>Secure documents</span>
-                        <strong>Signed URLs</strong>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-card">
+                    <div class="card-row card-header-row">
+                        <span class="card-label">Total Balance</span>
+                        <span class="card-badge">Live</span>
                     </div>
-                    <div class="signal-card">
-                        <span>Transfers</span>
-                        <strong>Serializable</strong>
+                    <div class="card-amount">$128,459.00</div>
+                    <div class="card-row">
+                        <div class="card-mini">
+                            <span>Savings</span>
+                            <strong>$84,230</strong>
+                        </div>
+                        <div class="card-mini">
+                            <span>Checking</span>
+                            <strong>$44,229</strong>
+                        </div>
                     </div>
-                    <div class="signal-card wide">
-                        <span>Platform telemetry</span>
-                        <strong>Micrometer metrics and searchable activity history</strong>
+                    <div class="card-bar">
+                        <div class="card-bar-fill" style="width: 65%"></div>
                     </div>
+                    <span class="card-footnote">65% savings ratio — ahead of target</span>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Stats -->
     <section class="stats-section">
-        <div class="stats-container">
+        <div class="stats-inner">
             @for (stat of stats; track stat.label) {
                 <div class="stat-item">
                     <div class="stat-value">{{ stat.value }}</div>
@@ -52,26 +53,52 @@
         </div>
     </section>
 
+    <!-- Features -->
     <section class="features-section">
-        <div class="section-container">
-            <h2 class="section-title">Built for high-trust workflows, not demo gloss.</h2>
-            <p class="section-subtitle">Every surface in Banque is designed to make sensitive banking operations legible, safe, and fast to act on.</p>
+        <div class="features-inner">
+            <span class="eyebrow">Why Banque</span>
+            <h2 class="section-heading">Enterprise capabilities, personal simplicity.</h2>
+            <p class="section-sub">Every surface is designed for clarity, speed, and trust at scale.</p>
             <div class="features-grid">
-                @for (feature of features; track feature.title) {
-                    <div class="feature-card surface-card">
-                        <h3 class="feature-title">{{ feature.title }}</h3>
-                        <p class="feature-description">{{ feature.description }}</p>
+                @for (feature of features; track feature.title; let i = $index) {
+                    <div class="feature-card" [style.animation-delay]="(i * 0.1) + 's'">
+                        <div class="feature-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path [attr.d]="feature.icon" />
+                            </svg>
+                        </div>
+                        <h3>{{ feature.title }}</h3>
+                        <p>{{ feature.description }}</p>
                     </div>
                 }
             </div>
         </div>
     </section>
 
+    <!-- CTA -->
     <section class="cta-section">
-        <div class="cta-container section-shell">
-            <h2 class="cta-title">One platform for customer flows, payments, transfers, and compliance evidence.</h2>
-            <p class="cta-subtitle">Start with the live Angular experience, then move through the same Spring Boot service that powers APIs, metrics, and deployment.</p>
-            <a routerLink="/auth/register" class="pill-button primary">Create Your Workspace</a>
+        <div class="cta-inner">
+            <h2>Start your workspace today.</h2>
+            <p>Join thousands of users managing their finances with confidence.</p>
+            <a routerLink="/auth/register" class="pill-button accent">Create Free Account</a>
         </div>
     </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <img src="banque-mark.svg" alt="Banque" class="footer-logo">
+                <span>Banque</span>
+                <p>Smart Banking Infrastructure by Prateek Singh</p>
+            </div>
+            <div class="footer-links">
+                <a routerLink="/about">About</a>
+                <a routerLink="/privacy">Privacy</a>
+                <a routerLink="/terms">Terms</a>
+                <a routerLink="/contact">Contact</a>
+            </div>
+            <div class="footer-copy">© 2025 Banque. All rights reserved.</div>
+        </div>
+    </footer>
 </div>

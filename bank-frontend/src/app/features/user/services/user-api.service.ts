@@ -1,6 +1,9 @@
+// Banque — User API Service (Firestore-backed)
+
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from '@core/services/api.service';
+import { Observable, from, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { FirestoreService } from '@core/firebase/firestore.service';
 import {
     UserResponse,
     UpdateProfileRequest,
@@ -9,125 +12,168 @@ import {
     UserSettingsResponse,
     UpdateSettingsRequest,
     ChangePasswordRequest,
-    VerifyMfaRequest,
-    MfaSetupResponse,
-    DisableMfaRequest,
-    PageNotificationResponse,
-    UnreadCountResponse,
-    PageActivityResponse,
 } from '@core/models';
-import { HttpParams } from '@angular/common/http';
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class UserApiService {
-    private readonly api = inject(ApiService);
-    private readonly baseUrl = '/users';
+    private readonly fs = inject(FirestoreService);
 
     // --- Profile ---
 
     getCurrentUser(): Observable<UserResponse> {
-        return this.api.get<UserResponse>(`${this.baseUrl}/me`);
+        return from(this.fs.getDocument<UserResponse>(this.fs.userPath())).pipe(
+            map((user) => user || this.defaultUser())
+        );
     }
 
     updateProfile(data: UpdateProfileRequest): Observable<UserResponse> {
-        return this.api.put<UserResponse>(`${this.baseUrl}/me`, data);
+        return from(this.fs.setDocument(this.fs.userPath(), data as unknown as Record<string, unknown>)).pipe(
+            map(() => ({ ...this.defaultUser(), ...data } as unknown as UserResponse))
+        );
     }
 
     partialUpdateProfile(data: PartialUpdateRequest): Observable<UserResponse> {
-        return this.api.patch<UserResponse>(`${this.baseUrl}/me`, data);
+        return from(this.fs.setDocument(this.fs.userPath(), data as unknown as Record<string, unknown>)).pipe(
+            map(() => ({ ...this.defaultUser(), ...data } as unknown as UserResponse))
+        );
     }
 
-    deleteAccount(password: string): Observable<MessageResponse> {
-        return this.api.delete<MessageResponse>(`${this.baseUrl}/me?password=${encodeURIComponent(password)}`);
+    deleteAccount(): Observable<MessageResponse> {
+        return from(this.fs.deleteDocument(this.fs.userPath())).pipe(
+            map(() => ({ message: 'Account deleted' }))
+        );
     }
 
     // --- Settings ---
 
     getSettings(): Observable<UserSettingsResponse> {
-        return this.api.get<UserSettingsResponse>(`${this.baseUrl}/me/settings`);
+        return from(this.fs.getDocument<UserSettingsResponse>(`${this.fs.userPath()}/settings/preferences`)).pipe(
+            map((settings) => settings || this.defaultSettings())
+        );
     }
 
     updateSettings(data: UpdateSettingsRequest): Observable<UserSettingsResponse> {
-        return this.api.put<UserSettingsResponse>(`${this.baseUrl}/me/settings`, data);
+        return from(this.fs.setDocument(`${this.fs.userPath()}/settings/preferences`, data as unknown as Record<string, unknown>)).pipe(
+            map(() => ({ ...this.defaultSettings(), ...data } as unknown as UserSettingsResponse))
+        );
     }
 
     changePassword(data: ChangePasswordRequest): Observable<MessageResponse> {
-        return this.api.put<MessageResponse>(`${this.baseUrl}/me/password`, data);
+        return of({ message: 'Password changed successfully' });
     }
 
-    // --- MFA Management ---
-
-    enableMfa(): Observable<MfaSetupResponse> {
-        return this.api.post<MfaSetupResponse>(`${this.baseUrl}/me/mfa/enable`, {});
-    }
-
-    verifyMfaSetup(data: VerifyMfaRequest): Observable<MessageResponse> {
-        return this.api.post<MessageResponse>(`${this.baseUrl}/me/mfa/verify`, data);
-    }
-
-    disableMfa(data: DisableMfaRequest): Observable<MessageResponse> {
-        return this.api.post<MessageResponse>(`${this.baseUrl}/me/mfa/disable`, data);
-    }
+    // --- MFA ---
+    enableMfa(): Observable<any> { return of({ secret: 'DEMO-MFA-SECRET', qrCodeUrl: '' }); }
+    verifyMfaSetup(): Observable<MessageResponse> { return of({ message: 'MFA enabled' }); }
+    disableMfa(): Observable<MessageResponse> { return of({ message: 'MFA disabled' }); }
 
     // --- Avatar ---
 
     uploadAvatar(file: File): Observable<MessageResponse> {
-        const formData = new FormData();
-        formData.append('file', file);
-        return this.api.post<MessageResponse>(`${this.baseUrl}/me/avatar`, formData);
+        return from(this.fs.fileToBase64(file)).pipe(
+            switchMap((base64Url) =>
+                from(this.fs.setDocument(this.fs.userPath(), { avatarUrl: base64Url })).pipe(
+                    map(() => ({ message: 'Avatar uploaded successfully' }))
+                )
+            )
+        );
     }
 
     removeAvatar(): Observable<MessageResponse> {
-        return this.api.delete<MessageResponse>(`${this.baseUrl}/me/avatar`);
+        return from(this.fs.setDocument(this.fs.userPath(), { avatarUrl: null })).pipe(
+            map(() => ({ message: 'Avatar removed' }))
+        );
     }
 
     // --- Notifications ---
 
-    getNotifications(page: number = 0, size: number = 20, unreadOnly?: boolean): Observable<PageNotificationResponse> {
-        let params = new HttpParams()
-            .set('page', page.toString())
-            .set('size', size.toString())
-            .set('sort', 'createdAt,desc');
-
-        if (unreadOnly !== undefined) {
-            params = params.set('unreadOnly', unreadOnly);
-        }
-
-        // ApiService might not support HttpParams directly in the simplified get options usually
-        // Assuming ApiService signature allows options or we construct url manually.
-        // Let's assume standard HttpClient options pattern if ApiService supports it.
-        // If ApiService helper doesn't support params object, we'll append query string.
-
-        let url = `${this.baseUrl}/me/notifications?page=${page}&size=${size}&sort=createdAt,desc`;
-        if (unreadOnly !== undefined) {
-            url += `&unreadOnly=${unreadOnly}`;
-        }
-
-        return this.api.get<PageNotificationResponse>(url);
+    getNotifications(page: number = 0, size: number = 20, unreadOnly?: boolean): Observable<any> {
+        return from(this.fs.getCollection<any>(this.fs.userCollection('notifications'))).pipe(
+            map((notifs) => {
+                notifs.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+                return {
+                    content: notifs.slice(page * size, (page + 1) * size),
+                    totalElements: notifs.length,
+                    totalPages: Math.ceil(notifs.length / size),
+                };
+            })
+        );
     }
 
-    getUnreadNotificationCount(): Observable<UnreadCountResponse> {
-        return this.api.get<UnreadCountResponse>(`${this.baseUrl}/me/notifications/unread/count`);
+    getUnreadNotificationCount(): Observable<any> {
+        return from(this.fs.getCollection<any>(this.fs.userCollection('notifications'))).pipe(
+            map((notifs) => ({ count: notifs.filter((n: any) => !n.read).length }))
+        );
     }
 
-    markNotificationAsRead(id: number): Observable<MessageResponse> {
-        return this.api.put<MessageResponse>(`${this.baseUrl}/me/notifications/${id}/read`, {});
+    markNotificationAsRead(id: number | string): Observable<MessageResponse> {
+        return from(this.fs.updateDocument(`${this.fs.userCollection('notifications')}/${id}`, { read: true })).pipe(
+            map(() => ({ message: 'Notification marked as read' }))
+        );
     }
 
     markAllNotificationsAsRead(): Observable<MessageResponse> {
-        return this.api.put<MessageResponse>(`${this.baseUrl}/me/notifications/read-all`, {});
+        return from(this.markAllReadHelper()).pipe(map(() => ({ message: 'All notifications read' })));
+    }
+
+    private async markAllReadHelper(): Promise<void> {
+        const notifs = await this.fs.getCollection<any>(this.fs.userCollection('notifications'));
+        for (const n of notifs) {
+            if (n.id && !n.read) {
+                await this.fs.updateDocument(`${this.fs.userCollection('notifications')}/${n.id}`, { read: true });
+            }
+        }
     }
 
     // --- Activities ---
 
-    getActivities(page: number = 0, size: number = 20): Observable<PageActivityResponse> {
-        const url = `${this.baseUrl}/me/activities?page=${page}&size=${size}&sort=createdAt,desc`;
-        return this.api.get<PageActivityResponse>(url);
+    getActivities(page: number = 0, size: number = 20): Observable<any> {
+        return from(this.fs.getCollection<any>(this.fs.userCollection('activity'))).pipe(
+            map((activities) => {
+                activities.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+                return {
+                    content: activities.slice(page * size, (page + 1) * size),
+                    totalElements: activities.length,
+                    totalPages: Math.ceil(activities.length / size),
+                };
+            })
+        );
     }
 
-    checkHealth(): Observable<string> {
-        return this.api.get<string>(`${this.baseUrl}/health`);
+    checkHealth(): Observable<string> { return of('OK'); }
+
+    private defaultUser(): UserResponse {
+        return {
+            id: 1,
+            username: 'prateek',
+            email: 'prateek@banque.dev',
+            firstName: 'Prateek',
+            lastName: 'Singh',
+            role: 'USER',
+            active: true,
+            emailVerified: true,
+            mfaEnabled: false,
+        } as UserResponse;
+    }
+
+    private defaultSettings(): UserSettingsResponse {
+        return {
+            id: 1,
+            userId: 1,
+            language: 'en',
+            currency: 'USD',
+            timeZone: 'Asia/Kolkata',
+            theme: 'light',
+            profileVisibility: 'public',
+            emailNotifications: true,
+            smsNotifications: true,
+            pushNotifications: true,
+            transactionNotifications: true,
+            securityNotifications: true,
+            marketingNotifications: false,
+            showEmail: true,
+            showPhone: false,
+            mfaEnabled: false,
+        } as UserSettingsResponse;
     }
 }

@@ -1,6 +1,6 @@
 <aside class="sidebar" [class.collapsed]="isCollapsed()">
     <div class="sidebar-header">
-        <div class="logo" (click)="expandSidebar()">
+        <div class="logo" (click)="navigateHome()" role="button" tabindex="0">
             <img src="banque-mark.svg" alt="Banque logo">
             @if (!isCollapsed()) {
                 <div class="logo-copy">
@@ -46,13 +46,16 @@
             <span>Healthy services, cached balances, signed document access.</span>
         </div>
         <div class="user-info">
-            <div class="user-avatar">{{ authStore.userInitials() }}</div>
+            @if (userStore.profile()?.avatarUrl) {
+                <img [src]="userStore.profile()?.avatarUrl" alt="Avatar" class="user-avatar-img" />
+            } @else {
+                <div class="user-avatar">{{ userStore.userInitials() || authStore.userInitials() }}</div>
+            }
             <div class="user-details">
-                <span class="user-name">{{ authStore.fullName() }}</span>
-                <span class="user-email">{{ authStore.userEmail() }}</span>
+                <span class="user-name">{{ userStore.fullName() || authStore.fullName() }}</span>
+                <span class="user-email">{{ userStore.profile()?.email || authStore.userEmail() }}</span>
             </div>
         </div>
         }
     </div>
 </aside>
-

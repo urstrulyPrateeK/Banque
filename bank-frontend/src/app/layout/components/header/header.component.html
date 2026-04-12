@@ -1,40 +1,111 @@
 <header class="app-header">
     <div class="header-left">
-        <span class="eyebrow">Scalable &amp; reliable</span>
-        <div class="title-stack">
-            <h1 class="page-title">Operations center</h1>
-            <p>Cross-functional banking workflows across accounts, transfers, payments, and compliance evidence.</p>
-        </div>
+        <h1 class="page-title">Operations center</h1>
     </div>
 
     <div class="header-right">
-        <button class="header-btn notification-btn" aria-label="Notifications">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <span class="notification-badge">3</span>
-        </button>
+        <!-- Notification Bell -->
+        <div class="dropdown-wrapper">
+            <button class="header-btn notification-btn" aria-label="Notifications" (click)="toggleNotifications()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                @if (userStore.unreadNotificationCount() > 0) {
+                    <span class="notification-badge">{{ userStore.unreadNotificationCount() }}</span>
+                }
+            </button>
 
-        <div class="user-menu">
-            <button class="user-menu-btn" (click)="navigateToProfile()">
-                <div class="user-avatar">{{ authStore.userInitials() }}</div>
-                <div class="user-copy">
-                    <span class="user-name">{{ authStore.fullName() || 'Banque user' }}</span>
-                    <small>{{ authStore.userEmail() || 'secured workspace' }}</small>
+            @if (showNotifications()) {
+            <div class="dropdown-panel notification-panel">
+                <div class="dropdown-header">
+                    <h3>Notifications</h3>
+                    @if (userStore.notifications().length > 0) {
+                        <button class="mark-all-btn" (click)="markAllRead()">Mark all read</button>
+                    }
                 </div>
-                <svg viewBox="0 0 20 20" fill="currentColor">
+                <div class="dropdown-body">
+                    @for (notif of userStore.notifications(); track notif.id) {
+                    <div class="notification-item" [class.unread]="!notif.read">
+                        <div class="notif-icon" [ngClass]="notif.type || 'info'">
+                            @switch (notif.type) {
+                                @case ('success') { <span>✓</span> }
+                                @case ('warning') { <span>⚠</span> }
+                                @case ('error') { <span>✕</span> }
+                                @default { <span>ℹ</span> }
+                            }
+                        </div>
+                        <div class="notif-content">
+                            <p class="notif-message">{{ notif.message }}</p>
+                            <small class="notif-time">{{ notif.createdAt | date:'short' }}</small>
+                        </div>
+                    </div>
+                    } @empty {
+                    <div class="empty-state">
+                        <p>No notifications yet</p>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- User Menu -->
+        <div class="dropdown-wrapper">
+            <button class="user-menu-btn" (click)="toggleDropdown()">
+                @if (userStore.profile()?.avatarUrl) {
+                    <img [src]="userStore.profile()?.avatarUrl" alt="Avatar" class="user-avatar-img" />
+                } @else {
+                    <div class="user-avatar">{{ userStore.userInitials() || authStore.userInitials() }}</div>
+                }
+                <div class="user-copy">
+                    <span class="user-name">{{ userStore.fullName() || authStore.fullName() || 'Banque user' }}</span>
+                    <small>{{ userStore.profile()?.email || authStore.userEmail() || 'secured workspace' }}</small>
+                </div>
+                <svg class="chevron" [class.open]="showDropdown()" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                         d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                         clip-rule="evenodd" />
                 </svg>
             </button>
-        </div>
 
-        <button class="header-btn logout-btn" (click)="logout()" aria-label="Logout">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-        </button>
+            @if (showDropdown()) {
+            <div class="dropdown-panel user-panel">
+                <div class="dropdown-profile-header">
+                    @if (userStore.profile()?.avatarUrl) {
+                        <img [src]="userStore.profile()?.avatarUrl" alt="Avatar" class="dropdown-avatar-img" />
+                    } @else {
+                        <div class="dropdown-avatar">{{ userStore.userInitials() || 'U' }}</div>
+                    }
+                    <div>
+                        <strong>{{ userStore.fullName() || 'User' }}</strong>
+                        <small>{{ userStore.profile()?.email }}</small>
+                    </div>
+                </div>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" (click)="navigateToProfile()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    My Profile
+                </button>
+                <button class="dropdown-item" (click)="navigateToSettings()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                    Settings
+                </button>
+                <button class="dropdown-item" (click)="navigateToActivity()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    Activity Log
+                </button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item logout" (click)="logout()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Sign Out
+                </button>
+            </div>
+            }
+        </div>
     </div>
 </header>
+
+<!-- Backdrop -->
+@if (showDropdown() || showNotifications()) {
+    <div class="dropdown-backdrop" (click)="showDropdown.set(false); showNotifications.set(false)"></div>
+}

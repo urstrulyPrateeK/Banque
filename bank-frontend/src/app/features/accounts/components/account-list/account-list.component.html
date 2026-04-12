@@ -29,21 +29,27 @@
         @if (accountStore.summary(); as summary) {
             <div class="summary-grid">
                 <div class="summary-card">
-                    <div class="summary-icon">🏦</div>
+                    <div class="summary-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>
+                    </div>
                     <div class="summary-content">
                         <h3>Total Accounts</h3>
                         <p class="summary-value">{{ summary.totalAccounts }}</p>
                     </div>
                 </div>
                 <div class="summary-card">
-                    <div class="summary-icon">✅</div>
+                    <div class="summary-icon active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+                    </div>
                     <div class="summary-content">
                         <h3>Active Accounts</h3>
                         <p class="summary-value">{{ summary.activeAccounts }}</p>
                     </div>
                 </div>
                 <div class="summary-card highlight">
-                    <div class="summary-icon">💰</div>
+                    <div class="summary-icon balance">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
                     <div class="summary-content">
                         <h3>Total Balance</h3>
                         <p class="summary-value">{{ summary.totalBalance | currency:summary.accounts[0]?.currency || 'USD' }}</p>
@@ -59,7 +65,15 @@
                     <div class="account-card" [class.primary]="account.isPrimary">
                         <div class="account-header">
                             <div class="account-type">
-                                <span class="account-icon">{{ getAccountTypeIcon(account.accountType) }}</span>
+                                <div class="account-icon" [class]="getAccountTypeIcon(account.accountType)">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        @switch (account.accountType) {
+                                            @case ('SAVINGS') { <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2L12 21l3.5-2L19 21zM12 7v4m-2-2h4"/> }
+                                            @case ('CHECKING') { <rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/> }
+                                            @default { <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/> }
+                                        }
+                                    </svg>
+                                </div>
                                 <div>
                                     <h3>{{ account.nickname || account.accountType }}</h3>
                                     <p class="account-number">{{ formatAccountNumber(account.accountNumber) }}</p>

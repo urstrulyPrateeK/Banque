@@ -1,23 +1,10 @@
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from '@core/services/api.service';
-import {
-    ActivateCardRequest,
-    CardDetailsResponse,
-    CardLimitsResponse,
-    CardRequestRequest,
-    CardResponse,
-    CardStatementResponse,
-    CardStatisticsResponse,
-    CardTransactionResponse,
-    CardTypesResponse,
-    ChangePinRequest,
-    MessageResponse,
-    PageCardResponse,
-    PageCardTransactionResponse,
-    Pageable,
-    SetCardLimitsRequest,
-} from '@core/models';
+// Banque — Card API Service (Firestore-backed)
+
+import { Injectable, inject } from '@angular/core';
+import { Observable, from, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { FirestoreService } from '@core/firebase/firestore.service';
+import { MessageResponse, Pageable } from '@core/models';
 
 export interface GetAllCardsParams {
     accountId?: number;
@@ -33,180 +20,128 @@ export interface GetCardTransactionsParams {
     endDate?: string;
 }
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class CardApiService {
-    private readonly api = inject(ApiService);
-    private readonly baseUrl = '/cards';
+    private readonly fs = inject(FirestoreService);
+    private get col() { return this.fs.userCollection('cards'); }
 
-    // GET endpoints
-    getAllCards(params: GetAllCardsParams): Observable<PageCardResponse> {
-        const queryParams: Record<string, string | number | string[]> = {
-            page: params.pageable.page,
-            size: params.pageable.size,
-            sort: params.pageable.sort?.length ? params.pageable.sort : ['createdAt,desc'],
+    getAllCards(params: GetAllCardsParams): Observable<any> {
+        return from(this.fs.getCollection<any>(this.col)).pipe(
+            map((cards) => {
+                let filtered = [...cards];
+                if (params.type) filtered = filtered.filter((c) => c.type === params.type);
+                if (params.status) filtered = filtered.filter((c) => c.status === params.status);
+                return { content: filtered, totalElements: filtered.length, totalPages: 1 };
+            })
+        );
+    }
+
+    getCard(id: number | string): Observable<any> {
+        return from(this.fs.getDocument<any>(`${this.col}/${id}`)).pipe(
+            map((c) => { if (!c) throw new Error('Card not found'); return c; })
+        );
+    }
+
+    getCardDetails(id: number | string): Observable<any> { return this.getCard(id); }
+
+    getCardLimits(id: number | string): Observable<any> {
+        return of({ dailyLimit: 5000, monthlyLimit: 50000, onlineLimit: 10000, atmLimit: 2000 });
+    }
+
+    getCardStatement(): Observable<any> { return of({ transactions: [] }); }
+
+    getCardTransactions(params: GetCardTransactionsParams): Observable<any> {
+        return of({ content: [], totalElements: 0, totalPages: 0 });
+    }
+
+    getCardTypes(): Observable<any> {
+        return of({ types: ['DEBIT', 'CREDIT', 'PREPAID'] });
+    }
+
+    getStatistics(): Observable<any> {
+        return from(this.fs.getCollection<any>(this.col)).pipe(
+            map((cards) => ({
+                totalCards: cards.length,
+                activeCards: cards.filter((c: any) => c.status === 'ACTIVE').length,
+                blockedCards: cards.filter((c: any) => c.status === 'BLOCKED').length,
+            }))
+        );
+    }
+
+    requestCard(data: any): Observable<any> {
+        const card: Record<string, unknown> = {
+            type: data.type || 'DEBIT',
+            cardNumber: this.generateCardNumber(),
+            expiryDate: this.generateExpiry(),
+            cvv: Math.floor(100 + Math.random() * 900).toString(),
+            cardholderName: data.cardholderName || 'Prateek Singh',
+            accountId: data.accountId,
+            status: 'ACTIVE',
+            onlineEnabled: true,
+            contactlessEnabled: true,
+            internationalEnabled: false,
+            createdAt: new Date().toISOString(),
         };
-
-        if (params.accountId) {
-            queryParams['accountId'] = params.accountId;
-        }
-        if (params.type) {
-            queryParams['type'] = params.type;
-        }
-        if (params.status) {
-            queryParams['status'] = params.status;
-        }
-
-        return this.api.get<PageCardResponse>(this.baseUrl, queryParams);
+        return from(this.fs.addDocument(this.col, card)).pipe(map((id) => ({ ...card, id })));
     }
 
-    getCard(id: number): Observable<CardResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.get<CardResponse>(`${this.baseUrl}/${id}`);
+    activateCard(id: number | string): Observable<MessageResponse> {
+        return from(this.fs.updateDocument(`${this.col}/${id}`, { status: 'ACTIVE' })).pipe(map(() => ({ message: 'Card activated' })));
     }
 
-    getCardDetails(id: number): Observable<CardDetailsResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.get<CardDetailsResponse>(`${this.baseUrl}/${id}/details`);
+    changePin(id: number | string): Observable<MessageResponse> {
+        return of({ message: 'PIN changed successfully' });
     }
 
-    getCardLimits(id: number): Observable<CardLimitsResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.get<CardLimitsResponse>(`${this.baseUrl}/${id}/limits`);
+    blockCard(id: number | string, reason: string): Observable<MessageResponse> {
+        return from(this.fs.updateDocument(`${this.col}/${id}`, { status: 'BLOCKED', blockReason: reason })).pipe(map(() => ({ message: 'Card blocked' })));
     }
 
-    getCardStatement(id: number, startDate: string, endDate: string): Observable<CardStatementResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        if (!startDate || !endDate) {
-            throw new Error('Start date and end date are required');
-        }
-        const params: Record<string, string> = { startDate, endDate };
-        return this.api.get<CardStatementResponse>(`${this.baseUrl}/${id}/statement`, params);
+    unblockCard(id: number | string): Observable<MessageResponse> {
+        return from(this.fs.updateDocument(`${this.col}/${id}`, { status: 'ACTIVE', blockReason: null })).pipe(map(() => ({ message: 'Card unblocked' })));
     }
 
-    getCardTransactions(params: GetCardTransactionsParams): Observable<PageCardTransactionResponse> {
-        if (!params.id || Number.isNaN(params.id) || params.id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        const queryParams: Record<string, string | number | string[]> = {
-            page: params.pageable.page,
-            size: params.pageable.size,
-            sort: params.pageable.sort?.length ? params.pageable.sort : ['createdAt,desc'],
-        };
-        if (params.startDate) {
-            queryParams['startDate'] = params.startDate;
-        }
-        if (params.endDate) {
-            queryParams['endDate'] = params.endDate;
-        }
-
-        return this.api.get<PageCardTransactionResponse>(`${this.baseUrl}/${params.id}/transactions`, queryParams);
+    reportLost(id: number | string): Observable<MessageResponse> {
+        return from(this.fs.updateDocument(`${this.col}/${id}`, { status: 'LOST' })).pipe(map(() => ({ message: 'Card reported lost' })));
     }
 
-    getCardTypes(): Observable<CardTypesResponse> {
-        return this.api.get<CardTypesResponse>(`${this.baseUrl}/types`);
+    replaceCard(id: number | string): Observable<any> {
+        return this.requestCard({});
     }
 
-    getStatistics(startDate?: string, endDate?: string): Observable<CardStatisticsResponse> {
-        const params: Record<string, string> = {};
-        if (startDate) params['startDate'] = startDate;
-        if (endDate) params['endDate'] = endDate;
-        return this.api.get<CardStatisticsResponse>(`${this.baseUrl}/statistics`, params);
+    toggleOnlineTransactions(id: number | string, enabled: boolean): Observable<MessageResponse> {
+        return from(this.fs.updateDocument(`${this.col}/${id}`, { onlineEnabled: enabled })).pipe(map(() => ({ message: `Online transactions ${enabled ? 'enabled' : 'disabled'}` })));
     }
 
-    // POST/PUT/DELETE endpoints
-    requestCard(data: CardRequestRequest): Observable<CardResponse> {
-        return this.api.post<CardResponse>(`${this.baseUrl}/request`, data);
+    toggleContactless(id: number | string, enabled: boolean): Observable<MessageResponse> {
+        return from(this.fs.updateDocument(`${this.col}/${id}`, { contactlessEnabled: enabled })).pipe(map(() => ({ message: `Contactless ${enabled ? 'enabled' : 'disabled'}` })));
     }
 
-    activateCard(id: number, data: ActivateCardRequest): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.post<MessageResponse>(`${this.baseUrl}/${id}/activate`, data);
+    toggleInternational(id: number | string, enabled: boolean): Observable<MessageResponse> {
+        return from(this.fs.updateDocument(`${this.col}/${id}`, { internationalEnabled: enabled })).pipe(map(() => ({ message: `International transactions ${enabled ? 'enabled' : 'disabled'}` })));
     }
 
-    changePin(id: number, data: ChangePinRequest): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.post<MessageResponse>(`${this.baseUrl}/${id}/change-pin`, data);
+    setCardLimits(id: number | string, data: any): Observable<any> {
+        return from(this.fs.updateDocument(`${this.col}/${id}`, { limits: data })).pipe(map(() => data));
     }
 
-    blockCard(id: number, reason: string): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.post<MessageResponse>(`${this.baseUrl}/${id}/block?reason=${encodeURIComponent(reason)}`, {});
+    cancelCard(id: number | string): Observable<MessageResponse> {
+        return from(this.fs.deleteDocument(`${this.col}/${id}`)).pipe(map(() => ({ message: 'Card cancelled' })));
     }
 
-    unblockCard(id: number): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.post<MessageResponse>(`${this.baseUrl}/${id}/unblock`, {});
+    checkHealth(): Observable<string> { return of('OK'); }
+
+    private generateCardNumber(): string {
+        const prefix = '4520';
+        let num = prefix;
+        for (let i = 0; i < 12; i++) num += Math.floor(Math.random() * 10);
+        return num;
     }
 
-    reportLost(id: number): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.post<MessageResponse>(`${this.baseUrl}/${id}/report-lost`, {});
-    }
-
-    replaceCard(id: number, reason: string): Observable<CardResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.post<CardResponse>(`${this.baseUrl}/${id}/replace?reason=${encodeURIComponent(reason)}`, {});
-    }
-
-    toggleOnlineTransactions(id: number, enabled: boolean): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.put<MessageResponse>(`${this.baseUrl}/${id}/online-transactions?enabled=${enabled}`, {});
-    }
-
-    toggleContactless(id: number, enabled: boolean): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.put<MessageResponse>(`${this.baseUrl}/${id}/contactless?enabled=${enabled}`, {});
-    }
-
-    toggleInternational(id: number, enabled: boolean): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.put<MessageResponse>(`${this.baseUrl}/${id}/international?enabled=${enabled}`, {});
-    }
-
-    setCardLimits(id: number, data: SetCardLimitsRequest): Observable<CardLimitsResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.put<CardLimitsResponse>(`${this.baseUrl}/${id}/limits`, data);
-    }
-
-    cancelCard(id: number): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid card ID');
-        }
-        return this.api.delete<MessageResponse>(`${this.baseUrl}/${id}`);
-    }
-
-    // Health check
-    checkHealth(): Observable<string> {
-        return this.api.get<string>(`${this.baseUrl}/health`);
+    private generateExpiry(): string {
+        const now = new Date();
+        const year = now.getFullYear() + 3;
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        return `${month}/${year}`;
     }
 }

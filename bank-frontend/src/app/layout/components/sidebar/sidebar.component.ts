@@ -1,6 +1,7 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '@features/auth/store/auth.store';
+import { UserStore } from '@features/user/store/user.store';
 
 interface NavItem {
     path: string;
@@ -16,7 +17,9 @@ interface NavItem {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
+    private readonly router = inject(Router);
     protected readonly authStore = inject(AuthStore);
+    protected readonly userStore = inject(UserStore);
     protected readonly isCollapsed = signal(false);
 
     protected readonly navItems: NavItem[] = [
@@ -34,10 +37,8 @@ export class SidebarComponent {
     protected toggleCollapse(): void {
         this.isCollapsed.update((v) => !v);
     }
-    protected expandSidebar() {
-       if (this.isCollapsed()) {
-      this.isCollapsed.set(false);
-  }
-}
 
+    protected navigateHome(): void {
+        this.router.navigate(['/']);
+    }
 }

@@ -1,15 +1,20 @@
-import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from '@core/services/api.service';
-import { FeedbackRequest, MessageResponse } from '@core/models';
+// Banque — Feedback API Service (Firestore-backed)
 
-@Injectable({
-    providedIn: 'root',
-})
+import { Injectable, inject } from '@angular/core';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { FirestoreService } from '@core/firebase/firestore.service';
+
+@Injectable({ providedIn: 'root' })
 export class FeedbackApiService {
-    private readonly api = inject(ApiService);
+    private readonly fs = inject(FirestoreService);
 
-    submitFeedback(payload: FeedbackRequest): Observable<MessageResponse> {
-        return this.api.post<MessageResponse>('/feedback', payload);
+    submitFeedback(data: { transactionId: number | string; positive?: boolean; rating?: string; comment?: string }): Observable<any> {
+        return from(
+            this.fs.addDocument(this.fs.userCollection('feedback'), {
+                ...data,
+                createdAt: new Date().toISOString(),
+            })
+        ).pipe(map((id) => ({ id, message: 'Feedback submitted' })));
     }
 }

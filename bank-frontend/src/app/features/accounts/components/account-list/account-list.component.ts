@@ -21,14 +21,10 @@ export class AccountListComponent implements OnInit {
 
     protected getAccountTypeIcon(type: string): string {
         switch (type) {
-            case 'SAVINGS':
-                return '💰';
-            case 'CHECKING':
-                return '💳';
-            case 'BUSINESS':
-                return '🏢';
-            default:
-                return '🏦';
+            case 'SAVINGS': return 'savings';
+            case 'CHECKING': return 'checking';
+            case 'BUSINESS': return 'business';
+            default: return 'default';
         }
     }
 

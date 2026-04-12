@@ -1,112 +1,114 @@
 <!-- Banque - by Prateek Singh | github.com/prateeksingh -->
 <div class="about-page">
-    <section class="about-hero surface-card">
-        <div class="hero-copy">
-            <span class="eyebrow">Product foundation</span>
-            <h1>Banque turns complex banking workflows into a clear operating surface.</h1>
-            <p class="hero-subtitle">
-                This platform combines Angular, Spring Boot, secure document handling, and measurable runtime behavior
-                so accounts, transfers, and compliance flows feel fast, legible, and dependable.
+    <!-- Hero -->
+    <section class="about-hero">
+        <div class="hero-inner">
+            <span class="eyebrow">About Banque</span>
+            <h1>Banking infrastructure built for clarity and trust.</h1>
+            <p class="hero-sub">
+                Banque combines modern frontend engineering with enterprise-grade backend services
+                to create a banking platform where every interaction feels fast, secure, and intentional.
             </p>
             <div class="hero-actions">
-                <a routerLink="/auth/register" class="btn-primary">Open the platform</a>
-                <a routerLink="/contact" class="btn-secondary">Talk to the team</a>
-            </div>
-        </div>
-
-        <div class="hero-panel">
-            <div class="signal-card">
-                <span>Signals</span>
-                <strong>Scalable and reliable</strong>
-                <p>Metrics, cache acceleration, transactional safety, and cloud-ready storage are part of the core build.</p>
-            </div>
-
-            <div class="signal-grid">
-                <article>
-                    <strong>Angular 21</strong>
-                    <p>Signals-driven UI with responsive dashboard surfaces.</p>
-                </article>
-                <article>
-                    <strong>Spring Boot 4</strong>
-                    <p>Secure APIs, actuator endpoints, and resilient backend flows.</p>
-                </article>
-                <article>
-                    <strong>Google Cloud path</strong>
-                    <p>Document storage is prepared for signed GCS access.</p>
-                </article>
-                <article>
-                    <strong>Single live URL</strong>
-                    <p>Angular is packaged into Spring Boot for one Render deployment.</p>
-                </article>
+                <a routerLink="/auth/register" class="btn-primary">Open an Account</a>
+                <a routerLink="/contact" class="btn-secondary">Talk to Us</a>
             </div>
         </div>
     </section>
 
-    <section class="story-section">
-        <div class="section-heading">
-            <span class="eyebrow">Why it exists</span>
-            <h2>Built for operators who need signal, not noise.</h2>
-        </div>
-
-        <div class="story-grid">
-            <article class="story-card surface-card">
-                <h3>Readable financial state</h3>
-                <p>
-                    The dashboard highlights total balance, monthly spend, account activity, and transfer velocity so
-                    users can understand the state of the system in one pass.
-                </p>
-            </article>
-
-            <article class="story-card surface-card">
-                <h3>Safer money movement</h3>
-                <p>
-                    Transfers are protected with serializable transactions, while secure authentication and feedback
-                    loops help the product surface trust and traceability at each step.
-                </p>
-            </article>
-
-            <article class="story-card surface-card">
-                <h3>Cloud-aware operations</h3>
-                <p>
-                    KYC and profile uploads connect to a storage abstraction that can run locally today and shift to
-                    Google Cloud Storage with signed URLs when cloud infrastructure is enabled.
-                </p>
-            </article>
-        </div>
-    </section>
-
-    <section class="values-section">
-        <div class="section-heading">
-            <span class="eyebrow">Design principles</span>
-            <h2>Every decision in Banque is aimed at trust, speed, and clarity.</h2>
-        </div>
-
-        <div class="values-grid">
-            @for (value of values; track value.title) {
-                <article class="value-card surface-card">
-                    <div class="value-icon">{{ value.icon }}</div>
-                    <h3>{{ value.title }}</h3>
-                    <p>{{ value.description }}</p>
-                </article>
-            }
-        </div>
-    </section>
-
-    <section class="timeline-section">
-        <div class="section-heading">
-            <span class="eyebrow">Delivery path</span>
-            <h2>Key steps that shaped the current platform.</h2>
-        </div>
-
-        <div class="timeline">
-            @for (milestone of milestones; track milestone.year) {
-                <article class="timeline-item">
-                    <div class="timeline-year">{{ milestone.year }}</div>
-                    <div class="timeline-content surface-card">
-                        <p>{{ milestone.event }}</p>
+    <!-- Tech Stack -->
+    <section class="tech-section">
+        <div class="section-inner">
+            <div class="section-heading">
+                <span class="eyebrow">Technology</span>
+                <h2>Built on proven foundations.</h2>
+                <p class="section-sub">Every layer of Banque is engineered for reliability, security, and developer velocity.</p>
+            </div>
+            <div class="tech-grid">
+                <article class="tech-card">
+                    <div class="tech-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg>
                     </div>
+                    <h3>Angular 21</h3>
+                    <p>Signals-driven reactive UI with standalone components and optimized change detection.</p>
                 </article>
-            }
+                <article class="tech-card">
+                    <div class="tech-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                    </div>
+                    <h3>Spring Boot 4</h3>
+                    <p>Secure REST APIs with actuator monitoring, structured logging, and transactional safety.</p>
+                </article>
+                <article class="tech-card">
+                    <div class="tech-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+                    </div>
+                    <h3>Google Cloud</h3>
+                    <p>Cloud Storage with signed URLs, Firebase auth, and Firestore for real-time data sync.</p>
+                </article>
+                <article class="tech-card">
+                    <div class="tech-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h3>Enterprise Security</h3>
+                    <p>JWT authentication, SMS-based 2FA, SERIALIZABLE isolation, and encrypted document access.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values -->
+    <section class="values-section">
+        <div class="section-inner">
+            <div class="section-heading">
+                <span class="eyebrow">Design Principles</span>
+                <h2>Every decision is aimed at trust, speed, and clarity.</h2>
+            </div>
+            <div class="values-grid">
+                @for (value of values; track value.title) {
+                    <article class="value-card">
+                        <div class="value-number">{{ value.icon }}</div>
+                        <h3>{{ value.title }}</h3>
+                        <p>{{ value.description }}</p>
+                    </article>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="timeline-section">
+        <div class="section-inner">
+            <div class="section-heading">
+                <span class="eyebrow">Platform Journey</span>
+                <h2>Key milestones that shaped Banque.</h2>
+            </div>
+            <div class="timeline">
+                @for (milestone of milestones; track milestone.year) {
+                    <article class="timeline-item">
+                        <div class="timeline-marker">
+                            <div class="marker-dot"></div>
+                            <div class="marker-line"></div>
+                        </div>
+                        <div class="timeline-content">
+                            <span class="timeline-label">{{ milestone.year }}</span>
+                            <p>{{ milestone.event }}</p>
+                        </div>
+                    </article>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-inner">
+            <h2>Ready to experience modern banking?</h2>
+            <p>Join Banque today and manage your finances with confidence.</p>
+            <div class="cta-actions">
+                <a routerLink="/auth/register" class="btn-primary">Get Started Free</a>
+                <a routerLink="/faq" class="btn-secondary">Read the FAQ</a>
+            </div>
         </div>
     </section>
 </div>

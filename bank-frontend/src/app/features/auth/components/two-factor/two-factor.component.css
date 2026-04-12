@@ -4,7 +4,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--bq-navy, #0a1628);
     position: relative;
 }
 
@@ -50,7 +50,7 @@
     width: 64px;
     height: 64px;
     margin: 0 auto 1.25rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--bq-navy, #0a1628);
     border-radius: 1rem;
     display: flex;
     align-items: center;
@@ -66,12 +66,12 @@
 .otp-header h1 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1a202c;
+    color: var(--bq-navy, #0a1628);
     margin: 0 0 0.5rem;
 }
 
 .otp-header .subtitle {
-    color: #718096;
+    color: var(--bq-slate, #64748b);
     font-size: 0.9375rem;
     margin: 0;
 }
@@ -95,22 +95,22 @@
     text-align: center;
     font-size: 1.5rem;
     font-weight: 600;
-    border: 2px solid #e2e8f0;
+    border: 2px solid var(--bq-mist, #e2e8f0);
     border-radius: 0.75rem;
-    background: #f7fafc;
+    background: var(--bq-cloud, #f8fafc);
     transition: all 0.2s;
 }
 
 .otp-input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: var(--bq-navy, #0a1628);
     background: white;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .otp-separator {
     font-size: 1.5rem;
-    color: #a0aec0;
+    color: var(--bq-slate, #94a3b8);
     font-weight: 600;
 }
 
@@ -138,7 +138,7 @@
 .submit-button {
     width: 100%;
     padding: 1rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--bq-navy, #0a1628);
     color: white;
     border: none;
     border-radius: 0.75rem;
@@ -181,11 +181,11 @@
     text-align: center;
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
+    border-top: 1px solid var(--bq-mist, #e2e8f0);
 }
 
 .resend-section p {
-    color: #718096;
+    color: var(--bq-slate, #64748b);
     font-size: 0.875rem;
     margin: 0 0 0.5rem;
 }
@@ -193,7 +193,7 @@
 .resend-button {
     background: none;
     border: none;
-    color: #667eea;
+    color: var(--bq-navy, #0a1628);
     font-weight: 600;
     cursor: pointer;
     font-size: 0.875rem;
@@ -204,7 +204,7 @@
 }
 
 .resend-button:disabled {
-    color: #a0aec0;
+    color: var(--bq-slate, #94a3b8);
     cursor: not-allowed;
 }
 

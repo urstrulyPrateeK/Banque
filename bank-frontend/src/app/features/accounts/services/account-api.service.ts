@@ -1,146 +1,156 @@
+// Banque — Account API Service (Firestore-backed)
+
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
-import { ApiService } from '@core/services/api.service';
+import { Observable, from, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { FirestoreService } from '@core/firebase/firestore.service';
 import {
     Account,
     CreateAccountRequest,
     UpdateAccountRequest,
-    AccountSummaryResponse,
     AllAccountsSummaryResponse,
     AccountStatisticsResponse,
-    PageBalanceHistoryResponse,
-    AccountTypesResponse,
     MessageResponse,
-    PageAccountResponse,
-    StatementResponse,
-    BalanceResponse,
-    DownloadStatementRequest
 } from '@core/models';
 
-@Injectable({
-    providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AccountApiService {
-    private readonly api = inject(ApiService);
-    private readonly baseUrl = '/accounts';
-
-    getAllAccounts(page: number = 0, size: number = 20, type?: string, status?: string): Observable<PageAccountResponse> {
-        const queryParams: Record<string, string | number> = {
-            page,
-            size,
-            sort: 'createdAt,desc'
-        };
-        if (type) queryParams['type'] = type;
-        if (status) queryParams['status'] = status;
-
-        return this.api.get<PageAccountResponse>(this.baseUrl, queryParams);
-    }
-
-    createAccount(data: CreateAccountRequest): Observable<Account> {
-        return this.api.post<Account>(this.baseUrl, data);
-    }
-
-    getAccount(id: number): Observable<Account> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return this.api.get<Account>(`${this.baseUrl}/${id}`);
-    }
-
-    updateAccount(id: number, data: UpdateAccountRequest): Observable<Account> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return this.api.patch<Account>(`${this.baseUrl}/${id}`, data);
-    }
-
-    closeAccount(id: number): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return this.api.delete<MessageResponse>(`${this.baseUrl}/${id}`);
-    }
-
-    setPrimaryAccount(id: number): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return this.api.put<MessageResponse>(`${this.baseUrl}/${id}/primary`, {});
-    }
-
-    freezeAccount(id: number, reason: string): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return this.api.put<MessageResponse>(`${this.baseUrl}/${id}/freeze?reason=${encodeURIComponent(reason)}`, {});
-    }
-
-    unfreezeAccount(id: number): Observable<MessageResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return this.api.put<MessageResponse>(`${this.baseUrl}/${id}/unfreeze`, {});
-    }
-
-    getAccountSummary(id: number): Observable<AccountSummaryResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return this.api.get<AccountSummaryResponse>(`${this.baseUrl}/${id}/summary`);
-    }
-
-    getBalance(id: number): Observable<BalanceResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        return this.api.get<BalanceResponse>(`${this.baseUrl}/${id}/balance`);
-    }
-
-    getBalanceHistory(id: number, startDate: string, endDate: string, page: number = 0, size: number = 20): Observable<PageBalanceHistoryResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        const params = {
-            startDate,
-            endDate,
-            page,
-            size,
-            sort: 'recordedAt,desc'
-        };
-        return this.api.get<PageBalanceHistoryResponse>(`${this.baseUrl}/${id}/balance/history`, params);
-    }
-
-    getAccountTypes(): Observable<AccountTypesResponse> {
-        return this.api.get<AccountTypesResponse>(`${this.baseUrl}/types`);
-    }
+    private readonly fs = inject(FirestoreService);
+    private get col() { return this.fs.userCollection('accounts'); }
 
     getAllAccountsSummary(): Observable<AllAccountsSummaryResponse> {
-        return this.api.get<AllAccountsSummaryResponse>(`${this.baseUrl}/summary`);
+        return from(this.fs.getCollection<Account>(this.col)).pipe(
+            map((accounts) => {
+                const active = accounts.filter((a) => a.status === 'ACTIVE');
+                return {
+                    accounts,
+                    totalAccounts: accounts.length,
+                    activeAccounts: active.length,
+                    totalBalance: accounts.reduce((sum, a) => sum + (a.balance || 0), 0),
+                };
+            })
+        );
     }
 
     getAccountStatistics(): Observable<AccountStatisticsResponse> {
-        return this.api.get<AccountStatisticsResponse>(`${this.baseUrl}/statistics`);
+        return from(this.fs.getCollection<Account>(this.col)).pipe(
+            map((accounts) => ({
+                savingsAccounts: accounts.filter((a) => a.accountType === 'SAVINGS').length,
+                checkingAccounts: accounts.filter((a) => a.accountType === 'CHECKING').length,
+                businessAccounts: accounts.filter((a) => a.accountType === 'BUSINESS').length,
+                totalBalance: accounts.reduce((sum, a) => sum + (a.balance || 0), 0),
+                savingsBalance: accounts.filter((a) => a.accountType === 'SAVINGS').reduce((sum, a) => sum + (a.balance || 0), 0),
+                checkingBalance: accounts.filter((a) => a.accountType === 'CHECKING').reduce((sum, a) => sum + (a.balance || 0), 0),
+            }))
+        );
     }
 
-    getStatement(id: number, startDate: string, endDate: string): Observable<StatementResponse> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
-        }
-        const params = {
-            startDate,
-            endDate
+    getAllAccounts(): Observable<any> {
+        return from(this.fs.getCollection<Account>(this.col)).pipe(
+            map((accounts) => ({ content: accounts, totalElements: accounts.length, totalPages: 1 }))
+        );
+    }
+
+    getAccount(id: number | string): Observable<Account> {
+        return from(this.fs.getDocument<Account>(`${this.col}/${id}`)).pipe(
+            map((acc) => {
+                if (!acc) throw new Error('Account not found');
+                return acc;
+            })
+        );
+    }
+
+    createAccount(data: CreateAccountRequest): Observable<Account> {
+        const account: Record<string, unknown> = {
+            accountType: data.accountType || 'SAVINGS',
+            nickname: data.nickname || data.accountType || 'My Account',
+            currency: data.currency || 'USD',
+            balance: 0,
+            status: 'ACTIVE',
+            isPrimary: false,
+            accountNumber: this.generateAccountNumber(),
+            createdAt: new Date().toISOString(),
         };
-        return this.api.get<StatementResponse>(`${this.baseUrl}/${id}/statement`, params);
+        return from(this.fs.addDocument(this.col, account)).pipe(
+            map((id) => ({ ...account, id } as unknown as Account))
+        );
     }
 
-    downloadStatement(id: number, data: DownloadStatementRequest): Observable<Blob> {
-        if (!id || Number.isNaN(id) || id <= 0) {
-            throw new Error('Invalid account ID');
+    updateAccount(id: number | string, data: UpdateAccountRequest): Observable<Account> {
+        return from(
+            this.fs.updateDocument(`${this.col}/${id}`, data as Record<string, unknown>)
+        ).pipe(
+            map(() => ({ id, ...data } as unknown as Account))
+        );
+    }
+
+    setPrimaryAccount(id: number | string): Observable<MessageResponse> {
+        // First unset all, then set the target
+        return from(this.setPrimaryHelper(String(id))).pipe(
+            map(() => ({ message: 'Primary account updated' }))
+        );
+    }
+
+    private async setPrimaryHelper(targetId: string): Promise<void> {
+        const accounts = await this.fs.getCollection<any>(this.col);
+        for (const acc of accounts) {
+            if (acc.id) {
+                await this.fs.updateDocument(`${this.col}/${acc.id}`, {
+                    isPrimary: String(acc.id) === targetId,
+                });
+            }
         }
-        return this.api.postBlob(`${this.baseUrl}/${id}/statement/download`, data);
+    }
+
+    freezeAccount(id: number | string, reason: string): Observable<MessageResponse> {
+        return from(
+            this.fs.updateDocument(`${this.col}/${id}`, { status: 'FROZEN', freezeReason: reason })
+        ).pipe(map(() => ({ message: 'Account frozen' })));
+    }
+
+    unfreezeAccount(id: number | string): Observable<MessageResponse> {
+        return from(
+            this.fs.updateDocument(`${this.col}/${id}`, { status: 'ACTIVE', freezeReason: null })
+        ).pipe(map(() => ({ message: 'Account unfrozen' })));
+    }
+
+    closeAccount(id: number | string): Observable<MessageResponse> {
+        return from(this.fs.deleteDocument(`${this.col}/${id}`)).pipe(
+            map(() => ({ message: 'Account closed' }))
+        );
+    }
+
+    getAccountSummary(id: number | string): Observable<any> {
+        return this.getAccount(id);
+    }
+
+    getBalance(id: number | string): Observable<any> {
+        return this.getAccount(id).pipe(map((a) => ({ balance: a.balance, currency: a.currency })));
+    }
+
+    getBalanceHistory(): Observable<any> {
+        return of({ content: [], totalElements: 0, totalPages: 0 });
+    }
+
+    getAccountTypes(): Observable<any> {
+        return of({ types: ['SAVINGS', 'CHECKING', 'BUSINESS'] });
+    }
+
+    getStatement(): Observable<any> {
+        return of({ transactions: [], period: {} });
+    }
+
+    downloadStatement(): Observable<Blob> {
+        return of(new Blob(['Statement not available in demo mode'], { type: 'text/plain' }));
     }
 
     checkHealth(): Observable<string> {
-        return this.api.get<string>(`${this.baseUrl}/health`);
+        return of('OK');
+    }
+
+    private generateAccountNumber(): string {
+        const prefix = '4520';
+        const rand = Math.floor(Math.random() * 100000000).toString().padStart(8, '0');
+        return `${prefix}${rand}`;
     }
 }

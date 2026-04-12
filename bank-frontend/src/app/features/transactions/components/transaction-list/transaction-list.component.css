@@ -141,7 +141,7 @@
 
 .transaction-meta div {
     padding: 0.9rem;
-    border-radius: 16px;
+    border-radius: var(--bq-r-xl, 20px);
     background: rgba(7, 26, 46, 0.04);
 }
 

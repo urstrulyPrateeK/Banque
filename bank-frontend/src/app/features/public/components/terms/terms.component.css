@@ -1,6 +1,6 @@
 .terms-page {
     min-height: 100vh;
-    background: #f7fafc;
+    background: var(--bq-cloud, #f8fafc);
     padding: 4rem 2rem;
 }
 
@@ -8,13 +8,13 @@
     max-width: 900px;
     margin: 0 auto;
     background: white;
-    border-radius: 16px;
+    border-radius: var(--bq-r-xl, 20px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     padding: 3rem;
 }
 
 .page-header {
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid var(--bq-mist, var(--bq-mist));
     padding-bottom: 2rem;
     margin-bottom: 3rem;
 }
@@ -22,18 +22,18 @@
 .page-header h1 {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #1a202c;
+    color: var(--bq-navy, #0a1628);
     margin: 0 0 0.5rem 0;
 }
 
 .last-updated {
-    color: #718096;
+    color: var(--bq-slate, #64748b);
     margin: 0;
 }
 
 .content {
     line-height: 1.8;
-    color: #4a5568;
+    color: var(--bq-slate, #64748b);
 }
 
 .content section {
@@ -43,14 +43,14 @@
 .content h2 {
     font-size: 1.75rem;
     font-weight: 600;
-    color: #1a202c;
+    color: var(--bq-navy, #0a1628);
     margin: 0 0 1rem 0;
 }
 
 .content h3 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #2d3748;
+    color: var(--bq-ink, #1a2332);
     margin: 1.5rem 0 0.75rem 0;
 }
 
@@ -68,7 +68,7 @@
 }
 
 .content strong {
-    color: #1a202c;
+    color: var(--bq-navy, #0a1628);
     font-weight: 600;
 }
 

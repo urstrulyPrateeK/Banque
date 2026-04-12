@@ -86,6 +86,16 @@ docker-data/
 *.pid
 
 ############################
+# Firebase / API Keys
+############################
+**/firebase.config.ts
+**/environments/environment.ts
+**/environments/environment.production.ts
+.env
+.env.local
+.env.production
+
+############################
 # Misc
 ############################
 tmp/

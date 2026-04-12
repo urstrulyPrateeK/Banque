@@ -1,26 +1,47 @@
-@import "tailwindcss";
+/* ═══════════════════════════════════════════════
+   Banque — Design System
+   Premium Banking UI · Vanilla CSS
+   ═══════════════════════════════════════════════ */
 
 :root {
-    --banque-navy: #071a2e;
-    --banque-ink: #0d2741;
-    --banque-slate: #5e748d;
-    --banque-mist: #dce9f3;
-    --banque-cloud: #f5f9fc;
-    --banque-white: #ffffff;
-    --banque-teal: #1fa8a2;
-    --banque-teal-bright: #73ead4;
-    --banque-cyan: #2f8ecb;
-    --banque-gold: #f2be5c;
-    --banque-success: #168a68;
-    --banque-danger: #c6515c;
-    --banque-warning: #e0942f;
-    --banque-border: rgba(13, 39, 65, 0.1);
-    --banque-shadow: 0 18px 50px rgba(7, 26, 46, 0.12);
-    --banque-shadow-soft: 0 10px 28px rgba(9, 34, 57, 0.08);
-    --banque-radius-lg: 28px;
-    --banque-radius-md: 20px;
-    --banque-radius-sm: 14px;
+    /* Core palette — refined for depth */
+    --bq-navy: #0a1628;
+    --bq-ink: #1a2332;
+    --bq-slate: #64748b;
+    --bq-mist: #e2e8f0;
+    --bq-cloud: #f8fafc;
+    --bq-white: #ffffff;
+
+    /* Brand accent — warmer, more vibrant */
+    --bq-teal: #0d9488;
+    --bq-teal-bright: #5eead4;
+    --bq-cyan: #0284c7;
+
+    /* Semantic */
+    --bq-gold: #f59e0b;
+    --bq-success: #059669;
+    --bq-danger: #dc2626;
+    --bq-warning: #d97706;
+
+    /* Surface */
+    --bq-border: rgba(15, 23, 42, 0.06);
+    --bq-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+    --bq-shadow-lg: 0 4px 6px rgba(0,0,0,0.02), 0 20px 50px rgba(0,0,0,0.08);
+    --bq-shadow-soft: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
+
+    /* Radii */
+    --bq-r-xl: 20px;
+    --bq-r-lg: 14px;
+    --bq-r-md: 10px;
+    --bq-r-sm: 8px;
+    --bq-r-full: 999px;
+
+    /* Timing */
+    --bq-ease: cubic-bezier(0.2, 0, 0, 1);
+    --bq-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+/* ─── Reset ────────────────────────────────── */
 
 *,
 *::before,
@@ -29,26 +50,27 @@
 }
 
 html {
-    font-family: "Sora", "Avenir Next", "Segoe UI", sans-serif;
-    line-height: 1.5;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    font-size: 16px;
+    color: var(--bq-ink);
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 body {
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    color: var(--banque-ink);
-    background:
-        radial-gradient(circle at top left, rgba(115, 234, 212, 0.28), transparent 32%),
-        radial-gradient(circle at top right, rgba(47, 142, 203, 0.18), transparent 30%),
-        linear-gradient(180deg, #f8fcff 0%, #eef4f8 100%);
+    background: var(--bq-cloud);
 }
 
 a {
     color: inherit;
+    text-decoration: none;
 }
 
 button,
@@ -56,43 +78,62 @@ input,
 select,
 textarea {
     font: inherit;
+    border: none;
+    outline: none;
 }
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    margin: 0;
+    color: var(--bq-navy);
+}
+
+p {
+    margin: 0;
+}
+
+/* ─── Focus ────────────────────────────────── */
 
 *:focus-visible {
-    outline: 3px solid rgba(31, 168, 162, 0.26);
-    outline-offset: 3px;
+    outline: 2px solid var(--bq-teal);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
+/* ─── Scrollbar ────────────────────────────── */
+
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 8px;
+    width: 8px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(12, 37, 62, 0.05);
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(13, 39, 65, 0.28);
-    border-radius: 999px;
+    background: rgba(13, 39, 65, 0.18);
+    border-radius: var(--bq-r-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(13, 39, 65, 0.4);
+    background: rgba(13, 39, 65, 0.32);
 }
 
 ::selection {
-    background-color: rgba(31, 168, 162, 0.2);
-    color: var(--banque-navy);
+    background-color: rgba(31, 168, 162, 0.15);
+    color: var(--bq-navy);
 }
 
-h1,
-h2,
-h3,
-h4 {
-    font-family: "Space Grotesk", "Sora", "Avenir Next", sans-serif;
-    letter-spacing: -0.03em;
-}
+/* ─── Utility: SR Only ─────────────────────── */
 
 .sr-only {
     position: absolute;
@@ -106,120 +147,174 @@ h4 {
     border: 0;
 }
 
+/* ─── Surface Cards ────────────────────────── */
+
 .surface-card {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.75);
-    box-shadow: var(--banque-shadow-soft);
-    border-radius: var(--banque-radius-md);
+    background: var(--bq-white);
+    border: 1px solid var(--bq-border);
+    box-shadow: var(--bq-shadow-soft);
+    border-radius: var(--bq-r-xl);
 }
+
+/* ─── Section Shell ────────────────────────── */
+
+.section-shell {
+    background: var(--bq-white);
+    border: 1px solid var(--bq-border);
+    border-radius: var(--bq-r-xl);
+    box-shadow: var(--bq-shadow);
+}
+
+/* ─── Eyebrow Label ────────────────────────── */
 
 .eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 0.55rem;
-    padding: 0.45rem 0.85rem;
-    border-radius: 999px;
-    background: rgba(7, 26, 46, 0.06);
-    color: var(--banque-slate);
-    font-size: 0.84rem;
-    font-weight: 700;
+    gap: 0.5rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--bq-r-full);
+    background: rgba(31, 168, 162, 0.08);
+    color: var(--bq-teal);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
 }
 
 .eyebrow::before {
     content: "";
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 999px;
-    background: linear-gradient(135deg, var(--banque-teal-bright), var(--banque-cyan));
-    box-shadow: 0 0 0 4px rgba(31, 168, 162, 0.12);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--bq-teal);
 }
 
-.section-shell {
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    border-radius: var(--banque-radius-lg);
-    box-shadow: var(--banque-shadow);
-}
+/* ─── Buttons ──────────────────────────────── */
 
 .pill-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.55rem;
-    padding: 0.95rem 1.35rem;
-    border: 1px solid transparent;
-    border-radius: 999px;
+    gap: 0.5rem;
+    padding: 0.875rem 1.75rem;
+    border: none;
+    border-radius: var(--bq-r-full);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: all 0.25s var(--bq-ease);
     text-decoration: none;
-    font-weight: 700;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    line-height: 1;
 }
 
 .pill-button:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
+}
+
+.pill-button:active {
+    transform: translateY(0);
 }
 
 .pill-button.primary {
-    background: linear-gradient(135deg, var(--banque-teal) 0%, var(--banque-cyan) 100%);
-    color: var(--banque-white);
-    box-shadow: 0 18px 30px rgba(31, 168, 162, 0.28);
+    background: var(--bq-navy);
+    color: var(--bq-white);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 4px 12px rgba(10,22,40,0.2);
+}
+
+.pill-button.primary:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 8px 20px rgba(10,22,40,0.28);
+    background: #0f1f33;
 }
 
 .pill-button.secondary {
-    background: rgba(255, 255, 255, 0.74);
-    color: var(--banque-navy);
-    border-color: rgba(13, 39, 65, 0.08);
+    background: var(--bq-white);
+    color: var(--bq-navy);
+    border: 1.5px solid var(--bq-mist);
+    box-shadow: var(--bq-shadow-soft);
 }
+
+.pill-button.secondary:hover {
+    background: var(--bq-cloud);
+    border-color: #cbd5e1;
+}
+
+.pill-button.accent {
+    background: linear-gradient(135deg, var(--bq-teal), var(--bq-cyan));
+    color: var(--bq-white);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 4px 12px rgba(13,148,136,0.25);
+}
+
+.pill-button.accent:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 8px 20px rgba(13,148,136,0.3);
+}
+
+/* ─── Skeleton Loaders ─────────────────────── */
 
 .skeleton {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(90deg, rgba(220, 233, 243, 0.85), rgba(255, 255, 255, 0.95), rgba(220, 233, 243, 0.85));
-    background-size: 200% 100%;
-    animation: banqueShimmer 1.5s linear infinite;
-    border-radius: 16px;
+    background: linear-gradient(90deg, #eef2f7, #f8fafb, #eef2f7);
+    background-size: 300% 100%;
+    animation: bqShimmer 1.8s ease infinite;
+    border-radius: var(--bq-r-md);
 }
 
 .skeleton-line {
-    height: 0.9rem;
-    border-radius: 12px;
+    height: 0.875rem;
+    border-radius: var(--bq-r-sm);
 }
 
 .skeleton-card {
     min-height: 120px;
 }
 
-@keyframes banqueShimmer {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
+@keyframes bqShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
-@keyframes banqueRise {
+/* ─── Animations ───────────────────────────── */
+
+@keyframes bqFadeUp {
     from {
         opacity: 0;
-        transform: translateY(14px);
+        transform: translateY(16px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-.banque-enter {
-    animation: banqueRise 0.55s ease both;
+@keyframes bqFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-@media (max-width: 720px) {
+@keyframes bqScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.banque-enter {
+    animation: bqFadeUp 0.5s var(--bq-ease) both;
+}
+
+/* ─── Responsive ───────────────────────────── */
+
+@media (max-width: 768px) {
     :root {
-        --banque-radius-lg: 22px;
-        --banque-radius-md: 18px;
+        --bq-r-xl: 18px;
+        --bq-r-lg: 14px;
+    }
+
+    html {
+        font-size: 15px;
     }
 }

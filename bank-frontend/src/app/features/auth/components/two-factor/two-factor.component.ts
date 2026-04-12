@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthStore } from '../../store/auth.store';
 import { AuthApiService } from '../../services/auth-api.service';
@@ -114,4 +114,3 @@ export class TwoFactorComponent {
         }, 1000);
     }
 }
-import { computed } from '@angular/core';
