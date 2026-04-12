@@ -20,6 +20,17 @@
 
 ---
 
+## Docs Navigation
+
+- README: [README.md](README.md)
+- Contributing: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Security: [SECURITY.md](SECURITY.md)
+- License: [LICENSE](LICENSE)
+- User research: [user-research.md](user-research.md)
+- UX flow: [ux-flow.md](ux-flow.md)
+
+---
+
 ## Why I Built This
 
 Most banking applications treat the frontend as an afterthought — forms bolted onto REST endpoints with minimal attention to user experience or operational clarity. I wanted to build something different: a banking platform where every interaction feels as fast, clear, and trustworthy as products from companies I admire.
