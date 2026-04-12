@@ -24,6 +24,8 @@ spring:
   cloud:
     gcp:
       project-id: ${GCP_PROJECT_ID:banque-project-id}
+      storage:
+        enabled: ${GCP_ENABLED:false}
   mail:
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:1025}
