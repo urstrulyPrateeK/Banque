@@ -11,6 +11,7 @@ COPY bank-frontend/ ./
 RUN sed -i "s/__FIREBASE_API_KEY__/${FIREBASE_API_KEY}/g" src/environments/environment*.ts && \
     sed -i "s/__FAST2SMS_API_KEY__/${FAST2SMS_API_KEY}/g" src/environments/environment*.ts
 
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
 
 FROM maven:3.9.4-eclipse-temurin-17 AS backend-build
