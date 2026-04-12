@@ -88,7 +88,6 @@ docker-data/
 ############################
 # Firebase / API Keys
 ############################
-**/firebase.config.ts
 **/environments/environment.ts
 **/environments/environment.production.ts
 .env
